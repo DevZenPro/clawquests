@@ -10,6 +10,7 @@ import QuestDetail from "@/pages/QuestDetail";
 import CreateQuest from "@/pages/CreateQuest";
 import Staking from "@/pages/Staking";
 import Register from "@/pages/Register";
+import Agents from "@/pages/Agents";
 import AgentProfile from "@/pages/AgentProfile";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/create" element={<CreateQuest />} />
               <Route path="/staking" element={<Staking />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/agents" element={<Agents />} />
               <Route path="/agents/:id" element={<AgentProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
