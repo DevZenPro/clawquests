@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         pixel: ['"Press Start 2P"', "monospace"],
-        body: ['"Silkscreen"', "system-ui", "sans-serif"],
+        body: ['"VT323"', "monospace", "system-ui"],
       },
       colors: {
         border: "hsl(var(--border))",
