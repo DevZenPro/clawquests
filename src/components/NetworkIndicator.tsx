@@ -6,11 +6,11 @@ export default function NetworkIndicator({ connected = true }: NetworkIndicatorP
   return (
     <div className={`flex items-center gap-1.5 text-[7px] font-pixel px-2 py-1 border ${
       connected 
-        ? "border-success/30 text-success/80 bg-success/5" 
-        : "border-destructive/30 text-destructive bg-destructive/5"
+        ? "border-success/40 text-success bg-success/10" 
+        : "border-destructive/40 text-destructive bg-destructive/10"
     }`}>
-      <span className={`inline-block h-1.5 w-1.5 ${connected ? "bg-success animate-pulse" : "bg-destructive"}`} />
-      {connected ? "Base" : "Wrong Net"}
+      <span className={`inline-block h-1.5 w-1.5 ${connected ? "bg-success" : "bg-destructive"}`} />
+      {connected ? "Base" : "Wrong Network"}
     </div>
   );
 }

@@ -4,55 +4,52 @@
 
 @layer base {
   :root {
-    /* Deep Space Blue background */
-    --background: 240 67% 3%;
-    --foreground: 200 15% 92%;
+    --background: 234 60% 6%;
+    --foreground: 210 20% 90%;
 
-    --card: 240 50% 5%;
-    --card-foreground: 200 15% 92%;
+    --card: 234 50% 8%;
+    --card-foreground: 210 20% 90%;
 
-    --popover: 240 50% 5%;
-    --popover-foreground: 200 15% 92%;
+    --popover: 234 50% 8%;
+    --popover-foreground: 210 20% 90%;
 
-    /* Base Blue */
-    --primary: 222 100% 50%;
+    /* Base official blue */
+    --primary: 220 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 40% 8%;
-    --secondary-foreground: 200 20% 75%;
+    --secondary: 234 40% 12%;
+    --secondary-foreground: 210 20% 80%;
 
-    --muted: 240 30% 7%;
-    --muted-foreground: 220 12% 58%;
+    --muted: 234 30% 10%;
+    --muted-foreground: 215 15% 50%;
 
-    /* Electric Cyan accent */
-    --accent: 183 100% 50%;
-    --accent-foreground: 240 67% 3%;
+    /* Lobster orange-red accent */
+    --accent: 17 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    /* Matrix Green */
-    --success: 128 100% 50%;
-    --success-foreground: 240 67% 3%;
+    --success: 155 80% 45%;
+    --success-foreground: 234 60% 6%;
 
-    /* Neon Purple */
-    --warning: 274 99% 53%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 100% 50%;
+    --warning-foreground: 234 60% 6%;
 
-    --border: 222 100% 50%;
-    --input: 240 30% 10%;
-    --ring: 183 100% 50%;
+    --border: 220 100% 50%;
+    --input: 234 30% 14%;
+    --ring: 17 100% 50%;
 
     --radius: 0px;
 
-    --sidebar-background: 240 50% 5%;
-    --sidebar-foreground: 200 20% 88%;
-    --sidebar-primary: 222 100% 50%;
+    --sidebar-background: 234 50% 8%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 220 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 40% 8%;
-    --sidebar-accent-foreground: 200 20% 75%;
-    --sidebar-border: 222 100% 50%;
-    --sidebar-ring: 183 100% 50%;
+    --sidebar-accent: 234 40% 12%;
+    --sidebar-accent-foreground: 210 20% 80%;
+    --sidebar-border: 220 100% 50%;
+    --sidebar-ring: 17 100% 50%;
   }
 }
 
@@ -64,8 +61,6 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
-    font-size: 18px;
-    letter-spacing: 0.03em;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -75,76 +70,66 @@
 
 @layer components {
   .pixel-card {
-    @apply bg-card border-2 border-primary/30 transition-all duration-200;
-    box-shadow: inset 0 0 0 1px hsl(240 30% 7%);
+    @apply bg-card border-2 border-primary/40 transition-colors duration-200;
+    box-shadow: inset 0 0 0 1px hsl(234 40% 12%);
   }
 
   .pixel-card:hover {
-    border-color: hsl(var(--accent));
-    box-shadow: 0 0 12px hsl(var(--accent) / 0.25), inset 0 0 0 1px hsl(240 30% 7%);
+    border-color: hsl(17 100% 50%);
   }
 
   .pixel-btn {
-    @apply px-6 py-3 font-pixel text-xs uppercase tracking-wider transition-all duration-200 border-2;
-    background: hsl(var(--accent));
-    border-color: hsl(183 80% 40%);
-    color: hsl(240 67% 3%);
+    @apply px-6 py-3 font-pixel text-xs uppercase tracking-wider transition-colors duration-200 border-2;
+    background: hsl(220 100% 50%);
+    border-color: hsl(220 80% 40%);
+    color: white;
   }
 
   .pixel-btn:hover {
-    background: hsl(183 100% 60%);
-    border-color: hsl(183 100% 50%);
-    box-shadow: 0 0 16px hsl(var(--accent) / 0.5);
+    background: hsl(17 100% 50%);
+    border-color: hsl(17 80% 40%);
   }
 
   .pixel-btn:disabled {
-    opacity: 0.3;
+    opacity: 0.4;
     cursor: not-allowed;
-    box-shadow: none;
   }
 
   .pixel-btn-outline {
-    @apply px-6 py-3 font-pixel text-xs uppercase tracking-wider transition-all duration-200 border-2;
-    border-color: hsl(var(--accent) / 0.5);
-    color: hsl(var(--accent));
+    @apply px-6 py-3 font-pixel text-xs uppercase tracking-wider transition-colors duration-200 border-2;
+    border-color: hsl(220 100% 50% / 0.6);
+    color: hsl(220 100% 60%);
     background: transparent;
   }
 
   .pixel-btn-outline:hover {
-    border-color: hsl(var(--accent));
-    color: hsl(var(--accent));
-    background: hsl(var(--accent) / 0.1);
-    box-shadow: 0 0 12px hsl(var(--accent) / 0.3);
+    border-color: hsl(17 100% 50%);
+    color: hsl(17 100% 60%);
+    background: hsl(17 100% 50% / 0.1);
   }
 
-  /* Status badges — Cyber-Neon palette */
   .status-open {
-    @apply bg-accent/15 text-accent border-2 border-accent/40;
+    @apply bg-accent/20 text-accent border-2 border-accent/40;
   }
 
   .status-claimed {
-    @apply bg-warning/15 text-warning border-2 border-warning/40;
+    @apply bg-warning/20 text-warning border-2 border-warning/40;
   }
 
   .status-pending {
-    @apply bg-warning/15 text-warning border-2 border-warning/40;
+    @apply bg-purple-500/20 text-purple-400 border-2 border-purple-500/40;
   }
 
   .status-completed {
-    @apply bg-success/15 text-success border-2 border-success/40;
+    @apply bg-success/20 text-success border-2 border-success/40;
   }
 
   .skill-tag {
-    @apply font-body text-xs px-2 py-0.5 border border-accent/25 bg-accent/5 text-accent/80 uppercase tracking-wider;
+    @apply font-pixel text-[7px] px-2 py-0.5 border border-primary/30 bg-primary/10 text-primary uppercase tracking-wider;
   }
 
   .bounty-badge {
-    @apply font-pixel text-success bg-success/10 border-2 border-success/30 px-3 py-1;
-  }
-
-  /* Terminal-style pulse for connect button */
-  .terminal-pulse {
-    animation: terminal-pulse 2s ease-in-out infinite;
+    @apply font-pixel text-success bg-success/10 border-2 border-success/40 px-3 py-1;
   }
 }
 
@@ -158,23 +143,12 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0px hsl(var(--accent) / 0.2); }
-  50% { box-shadow: 0 0 10px hsl(var(--accent) / 0.5); }
+  0%, 100% { box-shadow: 0 0 0px hsl(17 100% 50% / 0.3); }
+  50% { box-shadow: 0 0 8px hsl(17 100% 50% / 0.6); }
 }
 
 .pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes terminal-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 4px hsl(var(--accent) / 0.3);
-    border-color: hsl(var(--accent) / 0.5);
-  }
-  50% { 
-    box-shadow: 0 0 16px hsl(var(--accent) / 0.6);
-    border-color: hsl(var(--accent));
-  }
+  animation: pulse-glow 2s step-start infinite;
 }
 
 @keyframes ticker {
@@ -184,19 +158,4 @@
 
 .animate-ticker {
   animation: ticker 30s linear infinite;
-}
-
-/* Scanline overlay effect for hero */
-.scanlines::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    hsl(var(--accent) / 0.015) 2px,
-    hsl(var(--accent) / 0.015) 4px
-  );
-  pointer-events: none;
 }
