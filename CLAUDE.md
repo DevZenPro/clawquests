@@ -1,88 +1,182 @@
-# ClawQuests — Project Roadmap (for Claude Code)
+# ClawQuests — Multi-Agent Build Guide
 
-**Project:** `ClawQuests`
+**Project:** Onchain quest marketplace for AI agents on Base
 **Repo:** `git@github.com:DevZenPro/clawquests.git`
-**Local Path:** `/home/ops/projects/clawquests/`
-**Objective:** Finalize and deploy the `ClawQuests` dApp on Base Mainnet.
-
-This document outlines the remaining tasks to get from the current Lovable-generated UI to a fully functional, onchain application.
 
 ---
 
-## ✅ Phase 0: Complete
+## 🎯 Project Overview
 
-*   [x] **Architecture Finalized:** Plan is complete with bulletproof mechanics and growth engine.
-*   [x] **UI Scaffolding Complete:** Lovable has generated the full Next.js project.
-*   [x] **Project Setup:** The project is cloned locally and dependencies are installed.
+ClawQuests is a fully onchain quest marketplace where:
+- **Creators** post bounties for tasks (in USDC)
+- **AI Agents** claim and complete quests
+- **Referrers** earn 20% of platform fees from referred agents
 
----
-
-## Phase 1: Smart Contract Development
-
-*   **Status:** `TO-DO`
-*   **Owner:** The Dev / Claude Code
-
-**Tasks:**
-1.  **[ ] Create Foundry/Hardhat Project:** Set up a new project for smart contract development.
-2.  **[ ] Finalize `ClawQuests.sol`:**
-    *   Implement the final version of the contract based on the project plan.
-    *   Ensure all features are included: Staking, Timeouts, Approval Flow, Referrals, and Fee Discounts.
-3.  **[ ] Write Tests:** Create a comprehensive test suite for the contract.
-4.  **[ ] Deploy to Base Sepolia:** Deploy, verify, and save the final contract address and ABI.
+### Key Features
+- ERC721 quest NFTs with onchain SVG metadata
+- USDC bounties with 5% platform fee
+- Perpetual referral system
+- Staking requirement for spam prevention
+- 24-hour claim timeout protection
 
 ---
 
-## ✅ Phase 2: Frontend Architecture Refactor
+## 🤖 Agent Deployment Guide
 
-*   **Status:** `COMPLETE`
-*   **Owner:** ZotacClawdBot
+This project is designed for **multi-agent parallel development**. Each agent has its own CLAUDE.md with complete specifications.
 
-**Completed:**
-1.  **[x] Create `config/chains.ts`:** Base Mainnet and Base Sepolia configurations with contract addresses.
-2.  **[x] Create `lib/blockchain/abis.ts`:** ERC-8004 ABIs (from official repo), ERC20 ABI, ClawQuests placeholder ABI.
-3.  **[x] Create Modular Providers:** `lib/blockchain/providers/baseProvider.ts` with types, helpers, and constants.
-4.  **[x] Create Generic Client:** `lib/blockchain/client.ts` as the single entry point for the UI.
+### Agent 1: Smart Contract Developer
 
----
+**Directory:** `/contracts`
+**CLAUDE.md:** `contracts/CLAUDE.md`
 
-## Phase 3: Frontend Feature Integration
+```bash
+# Run from project root
+cd /home/ops/projects/clawquests/contracts
+claude "Implement all TODO functions in ClawQuests.sol and all tests in ClawQuests.t.sol. Run forge test until all pass."
+```
 
-*   **Status:** `TO-DO`
-*   **Owner:** The Dev / Claude Code
-
-**Tasks:**
-*For each page, replace static mock data with live onchain data by wiring up the wagmi hooks.*
-
-1.  **[ ] Homepage (`src/pages/Home.tsx`):**
-    *   [ ] Wire up all 5 stats cards (TVL, Volume, etc.) to contract view functions.
-    *   [ ] Implement the "Agent Pulse" ticker by listening for contract events.
-
-2.  **[ ] Quests Pages (`src/pages/Quests.tsx`, `src/pages/QuestDetail.tsx`):**
-    *   [ ] Fetch and display the list of open quests.
-    *   [ ] Implement tag filtering.
-    *   [ ] Wire up all conditional action buttons (`Claim`, `Submit Result`, `Approve`, `Reject`, `Reclaim`).
-
-3.  **[ ] Create Quest Page (`src/pages/CreateQuest.tsx`):**
-    *   [ ] Implement the staking requirement check.
-    *   [ ] Wire up the `createQuest` transaction flow (USDC approval + contract call).
-
-4.  **[ ] Staking Page (`src/pages/Staking.tsx`):**
-    *   [ ] Display the user's current stake.
-    *   [ ] Wire up the "Stake" and "Unstake" buttons.
-
-5.  **[ ] Agent Pages (`src/pages/Agents.tsx`, `src/pages/AgentProfile.tsx`):**
-    *   [ ] Fetch and display agent data from the `ERC-8004` registries.
-    *   [ ] Implement the "Referrals" tab on the profile page, showing the referral link and earnings.
+**Deliverables:**
+- Complete `src/ClawQuests.sol` implementation
+- Complete `test/ClawQuests.t.sol` tests
+- All tests passing
 
 ---
 
-## Phase 4: Launch
+### Agent 2: Frontend Integrator
 
-*   **Status:** `TO-DO`
-*   **Owner:** The Dev
+**Directory:** `/src`  
+**CLAUDE.md:** `src/CLAUDE.md`
 
-**Tasks:**
-1.  **[ ] Final E2E Testing:** Test the full dApp flow on Base Sepolia.
-2.  **[ ] Deploy to Base Mainnet:** Deploy the final `ClawQuests.sol` contract.
-3.  **[ ] Deploy Frontend:** Deploy the Next.js app to Vercel.
-4.  **[ ] Seed & Announce:** Create the first quests and announce the launch on Twitter and Farcaster.
+```bash
+# Run from project root
+cd /home/ops/projects/clawquests
+claude "Wire up all React components to the blockchain using wagmi. Follow src/CLAUDE.md."
+```
+
+**Deliverables:**
+- Web3Provider setup
+- All pages integrated with contract reads/writes
+- Working wallet connection
+
+---
+
+### Agent 3: Deploy Agent (Run After 1 & 2)
+
+**Directory:** `/contracts`
+
+```bash
+cd /home/ops/projects/clawquests/contracts
+claude "Deploy ClawQuests.sol to Base Sepolia. Use forge script. USDC address: 0x036CbD53842c5426634e7929541eC2318f3dCF7e. Treasury: [deployer address]. Verify on BaseScan."
+```
+
+**Deliverables:**
+- Deployed contract address
+- Verified on BaseScan
+- Updated `src/config/chains.ts` with address
+
+---
+
+## 📁 Project Structure
+
+```
+clawquests/
+├── CLAUDE.md                 # This file (coordinator)
+├── contracts/
+│   ├── CLAUDE.md             # Smart contract agent guide
+│   ├── src/
+│   │   ├── IClawQuests.sol   # ✅ Interface (spec)
+│   │   └── ClawQuests.sol    # 🔧 Implementation
+│   ├── test/
+│   │   └── ClawQuests.t.sol  # 🔧 Tests
+│   └── foundry.toml
+├── src/
+│   ├── CLAUDE.md             # Frontend agent guide
+│   ├── config/chains.ts      # ✅ Chain configs
+│   ├── lib/blockchain/       # ✅ ABIs & client
+│   ├── pages/                # 🔧 Wire up
+│   └── components/           # 🔧 Wire up
+└── package.json
+```
+
+---
+
+## ✅ Phase Status
+
+| Phase | Status | Agent |
+|-------|--------|-------|
+| 0. Architecture | ✅ Complete | - |
+| 1. Smart Contracts | 🔧 Ready | Contract Agent |
+| 2. Frontend Infra | ✅ Complete | - |
+| 3. Frontend Integration | 🔧 Ready | Frontend Agent |
+| 4. Deployment | ⏳ Waiting | Deploy Agent |
+| 5. Launch | ⏳ Waiting | - |
+
+---
+
+## 🔑 Key Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| MIN_STAKE | 10 USDC | Required to create quests |
+| CREATION_FEE | 0.10 USDC | Per quest |
+| PLATFORM_FEE | 5% | Of bounty on completion |
+| REFERRAL_SHARE | 20% | Of platform fee |
+| CLAIM_TIMEOUT | 24 hours | Before reclaim allowed |
+| MIN_BOUNTY | 1 USDC | Minimum bounty |
+
+---
+
+## 🔗 Contract Addresses
+
+### Base Sepolia (Testnet)
+```
+USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+IdentityRegistry: 0x8004A818BFB912233c491871b3d84c89A494BD9e
+ReputationRegistry: 0x8004B663056A597Dffe9eCcC1965A193B7388713
+ClawQuests: TBD (after deployment)
+```
+
+### Base Mainnet
+```
+USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+IdentityRegistry: 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432
+ReputationRegistry: 0x8004BAa17C55a88189AE136b182e5fdA19dE9b63
+ClawQuests: TBD (after deployment)
+```
+
+---
+
+## 🧪 Testing
+
+### Smart Contracts
+```bash
+cd contracts
+forge test -vvv
+forge test --gas-report
+```
+
+### Frontend
+```bash
+npm run dev
+npm run typecheck
+npm run build
+```
+
+---
+
+## 🚀 Deployment Checklist
+
+- [ ] All contract tests pass
+- [ ] Frontend builds without errors
+- [ ] Deploy to Base Sepolia
+- [ ] Verify contract on BaseScan
+- [ ] Update chain config with address
+- [ ] E2E test on testnet
+- [ ] Deploy to Base Mainnet
+- [ ] Update chain config with mainnet address
+- [ ] Deploy frontend to Vercel
+
+---
+
+Good luck building! 🦞
