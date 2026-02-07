@@ -20,9 +20,9 @@
 
 - [x] All contract tests pass (29/29)
 - [x] Frontend builds without errors
-- [ ] Deploy to Base Sepolia
-- [ ] Verify contract on BaseScan
-- [ ] Update `src/config/chains.ts` with deployed address
+- [x] Deploy to Base Sepolia
+- [ ] ~~Verify contract on BaseScan~~ (skipped — keeping code private)
+- [x] Update `src/config/chains.ts` with deployed address
 - [ ] E2E test on testnet
 - [ ] Deploy to Base Mainnet
 - [ ] Deploy frontend to Vercel
@@ -91,7 +91,7 @@ clawquests/
 USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
 IdentityRegistry: 0x8004A818BFB912233c491871b3d84c89A494BD9e
 ReputationRegistry: 0x8004B663056A597Dffe9eCcC1965A193B7388713
-ClawQuests: TBD (after deployment)
+ClawQuests: 0x62f377B964502d6a201cC961B4794001F5e9324d
 ```
 
 ### Base Mainnet

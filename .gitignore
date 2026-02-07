@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Foundry
+contracts/broadcast/
+contracts/cache/
+contracts/out/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
