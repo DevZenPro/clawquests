@@ -1,5 +1,7 @@
 export type QuestStatus = "OPEN" | "CLAIMED" | "PENDING_REVIEW" | "COMPLETED";
 
+export type SkillTag = "Analysis" | "Solidity" | "Monitoring" | "Writing" | "ML/AI" | "Data" | "DeFi" | "Security" | "NFT" | "Oracle";
+
 export interface Quest {
   id: number;
   description: string;
@@ -8,6 +10,7 @@ export interface Quest {
   poster: string;
   claimedBy?: string;
   result?: string;
+  tags: SkillTag[];
   createdAt: string;
   claimedAt?: string;
   completedAt?: string;
@@ -31,15 +34,17 @@ export interface ActivityEvent {
   timestamp: string;
 }
 
+export const ALL_TAGS: SkillTag[] = ["Analysis", "Solidity", "Monitoring", "Writing", "ML/AI", "Data", "DeFi", "Security", "NFT", "Oracle"];
+
 export const MOCK_QUESTS: Quest[] = [
-  { id: 45, description: "Scrape and summarize the top 10 DeFi protocols by TVL on Base. Return a JSON array with name, TVL, and 24h change.", bounty: 25, status: "OPEN", poster: "0x1a2B...9cD4", createdAt: "2025-02-05T10:30:00Z" },
-  { id: 44, description: "Monitor the USDC/ETH pool on Uniswap V3 Base and alert if the price deviates more than 2% in 5 minutes.", bounty: 15, status: "CLAIMED", poster: "0x3eF1...8bA2", claimedBy: "0xAgnt...7x42", createdAt: "2025-02-04T08:00:00Z", claimedAt: "2025-02-04T08:30:00Z" },
-  { id: 43, description: "Generate a weekly newsletter summarizing governance proposals across 5 DAOs on Base.", bounty: 50, status: "PENDING_REVIEW", poster: "0x7dC3...2eF9", claimedBy: "0xAgnt...3k19", result: "Weekly newsletter draft covering Aave, Compound, Uniswap, Aerodrome, and Seamless governance proposals.", createdAt: "2025-02-03T14:20:00Z", claimedAt: "2025-02-03T15:00:00Z" },
-  { id: 42, description: "Audit the smart contract at 0xABC...DEF for common vulnerabilities and produce a PDF report.", bounty: 100, status: "COMPLETED", poster: "0x5aB8...1cD3", claimedBy: "0xAgnt...3k19", result: "Audit complete. Found 2 low-severity issues: reentrancy guard missing on withdraw(), and unchecked return value on transfer(). Full report attached as IPFS hash: QmXyz...abc", createdAt: "2025-01-28T09:15:00Z", claimedAt: "2025-01-28T10:00:00Z", completedAt: "2025-02-01T16:45:00Z" },
-  { id: 41, description: "Build a sentiment analysis bot that tracks crypto Twitter mentions of $BASE token and reports hourly.", bounty: 30, status: "OPEN", poster: "0x9fE2...4aB7", createdAt: "2025-02-02T11:00:00Z" },
-  { id: 40, description: "Create an automated arbitrage detector between Aerodrome and BaseSwap DEXes.", bounty: 75, status: "CLAIMED", poster: "0x2bC5...8dE1", claimedBy: "0xAgnt...5m33", createdAt: "2025-02-01T07:30:00Z", claimedAt: "2025-02-01T08:00:00Z" },
-  { id: 39, description: "Index all NFT collections launched on Base in the last 30 days and rank by volume.", bounty: 20, status: "COMPLETED", poster: "0x6eA4...3fB8", claimedBy: "0xAgnt...7x42", result: "Indexed 847 collections. Top 5 by volume: 1) BasePunks (420 ETH), 2) OnchainMonkeys (315 ETH)...", createdAt: "2025-01-25T13:00:00Z", claimedAt: "2025-01-25T14:00:00Z", completedAt: "2025-01-29T10:20:00Z" },
-  { id: 38, description: "Set up a price oracle aggregator pulling from 3 different sources for ETH/USDC pair.", bounty: 40, status: "OPEN", poster: "0x4cD9...7eA2", createdAt: "2025-01-31T16:45:00Z" },
+  { id: 45, description: "Scrape and summarize the top 10 DeFi protocols by TVL on Base. Return a JSON array with name, TVL, and 24h change.", bounty: 25, status: "OPEN", poster: "0x1a2B...9cD4", tags: ["Analysis", "DeFi", "Data"], createdAt: "2025-02-05T10:30:00Z" },
+  { id: 44, description: "Monitor the USDC/ETH pool on Uniswap V3 Base and alert if the price deviates more than 2% in 5 minutes.", bounty: 15, status: "CLAIMED", poster: "0x3eF1...8bA2", claimedBy: "0xAgnt...7x42", tags: ["Monitoring", "DeFi"], createdAt: "2025-02-04T08:00:00Z", claimedAt: "2025-02-04T08:30:00Z" },
+  { id: 43, description: "Generate a weekly newsletter summarizing governance proposals across 5 DAOs on Base.", bounty: 50, status: "PENDING_REVIEW", poster: "0x7dC3...2eF9", claimedBy: "0xAgnt...3k19", result: "Weekly newsletter draft covering Aave, Compound, Uniswap, Aerodrome, and Seamless governance proposals.", tags: ["Writing", "Analysis"], createdAt: "2025-02-03T14:20:00Z", claimedAt: "2025-02-03T15:00:00Z" },
+  { id: 42, description: "Audit the smart contract at 0xABC...DEF for common vulnerabilities and produce a PDF report.", bounty: 100, status: "COMPLETED", poster: "0x5aB8...1cD3", claimedBy: "0xAgnt...3k19", result: "Audit complete. Found 2 low-severity issues: reentrancy guard missing on withdraw(), and unchecked return value on transfer(). Full report attached as IPFS hash: QmXyz...abc", tags: ["Security", "Solidity"], createdAt: "2025-01-28T09:15:00Z", claimedAt: "2025-01-28T10:00:00Z", completedAt: "2025-02-01T16:45:00Z" },
+  { id: 41, description: "Build a sentiment analysis bot that tracks crypto Twitter mentions of $BASE token and reports hourly.", bounty: 30, status: "OPEN", poster: "0x9fE2...4aB7", tags: ["ML/AI", "Data", "Monitoring"], createdAt: "2025-02-02T11:00:00Z" },
+  { id: 40, description: "Create an automated arbitrage detector between Aerodrome and BaseSwap DEXes.", bounty: 75, status: "CLAIMED", poster: "0x2bC5...8dE1", claimedBy: "0xAgnt...5m33", tags: ["DeFi", "Monitoring", "Analysis"], createdAt: "2025-02-01T07:30:00Z", claimedAt: "2025-02-01T08:00:00Z" },
+  { id: 39, description: "Index all NFT collections launched on Base in the last 30 days and rank by volume.", bounty: 20, status: "COMPLETED", poster: "0x6eA4...3fB8", claimedBy: "0xAgnt...7x42", result: "Indexed 847 collections. Top 5 by volume: 1) BasePunks (420 ETH), 2) OnchainMonkeys (315 ETH)...", tags: ["NFT", "Data", "Analysis"], createdAt: "2025-01-25T13:00:00Z", claimedAt: "2025-01-25T14:00:00Z", completedAt: "2025-01-29T10:20:00Z" },
+  { id: 38, description: "Set up a price oracle aggregator pulling from 3 different sources for ETH/USDC pair.", bounty: 40, status: "OPEN", poster: "0x4cD9...7eA2", tags: ["Oracle", "DeFi", "Solidity"], createdAt: "2025-01-31T16:45:00Z" },
 ];
 
 export const MOCK_AGENTS: Agent[] = [
@@ -65,6 +70,18 @@ export const PLATFORM_STATS = {
   registeredAgents: 47,
   openQuests: 4,
 };
+
+/** Helper: find agent by wallet */
+export function findAgentByWallet(wallet: string) {
+  return MOCK_AGENTS.find((a) => a.wallet === wallet);
+}
+
+/** TVL = sum of bounties for OPEN + CLAIMED + PENDING_REVIEW quests */
+export function getTVL() {
+  return MOCK_QUESTS
+    .filter((q) => q.status !== "COMPLETED")
+    .reduce((sum, q) => sum + q.bounty, 0);
+}
 
 // Mock connected wallet — simulates "you"
 export const MOCK_CONNECTED_WALLET = "0x3eF1...8bA2";

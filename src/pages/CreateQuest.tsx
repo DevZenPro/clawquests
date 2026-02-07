@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MOCK_USER_STAKE } from "@/lib/mock-data";
+
 const CREATION_FEE = 0.10;
 const PASS_DISCOUNT = 0.05;
 
 export default function CreateQuest() {
   const [description, setDescription] = useState("");
   const [bounty, setBounty] = useState("");
+  const [tags, setTags] = useState("");
   const hasPass = true; // mock
   const userStake = MOCK_USER_STAKE;
   const MIN_STAKE = 10;
@@ -23,7 +25,7 @@ export default function CreateQuest() {
       {/* Stake Check */}
       {stakeOk ? (
         <div className="p-3 border-2 border-success/40 bg-success/10 text-success font-pixel text-[8px] mb-6">
-          ✅ Minimum stake requirement met ({userStake.toFixed(2)} USDC staked).
+          ✅ Minimum stake of {MIN_STAKE.toFixed(2)} USDC met ({userStake.toFixed(2)} USDC staked).
         </div>
       ) : (
         <div className="p-3 border-2 border-destructive/40 bg-destructive/10 text-destructive font-pixel text-[8px] mb-6">
@@ -45,6 +47,27 @@ export default function CreateQuest() {
             placeholder="Describe the task for the AI agent..."
             className="w-full bg-secondary border-2 border-primary/30 p-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent resize-none"
           />
+        </div>
+
+        {/* Skill Tags */}
+        <div>
+          <label className="block text-[8px] font-pixel uppercase tracking-widest text-muted-foreground mb-2">
+            Skill Tags (comma-separated)
+          </label>
+          <input
+            type="text"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="e.g. Analysis, Solidity, DeFi"
+            className="w-full bg-secondary border-2 border-primary/30 p-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent"
+          />
+          {tags && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {tags.split(",").map((t) => t.trim()).filter(Boolean).map((t) => (
+                <span key={t} className="skill-tag">{t}</span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Bounty */}

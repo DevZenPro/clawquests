@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { MOCK_QUESTS, MOCK_CONNECTED_WALLET, MOCK_CONNECTED_AGENT_WALLET } from "@/lib/mock-data";
 import StatusBadge from "@/components/StatusBadge";
+import AgentMiniCard from "@/components/AgentMiniCard";
 import { useState } from "react";
 
 function isTimedOut(quest: (typeof MOCK_QUESTS)[0]) {
@@ -46,6 +47,15 @@ export default function QuestDetail() {
           {quest.bounty.toFixed(2)} USDC
         </div>
 
+        {/* Skill Tags */}
+        {quest.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {quest.tags.map((tag) => (
+              <span key={tag} className="skill-tag">{tag}</span>
+            ))}
+          </div>
+        )}
+
         {/* Description */}
         <div className="mb-6">
           <h3 className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground mb-2">Description</h3>
@@ -64,32 +74,28 @@ export default function QuestDetail() {
 
         {/* Actions */}
         <div className="mb-6 space-y-3">
-          {/* OPEN — anyone can claim */}
           {quest.status === "OPEN" && (
             <button className="pixel-btn w-full">Claim Quest</button>
           )}
 
-          {/* CLAIMED — claimant can submit result */}
           {quest.status === "CLAIMED" && isClaimant && !timedOut && (
             <button onClick={() => setShowModal(true)} className="pixel-btn w-full">
               Submit Result
             </button>
           )}
 
-          {/* CLAIMED & timed out — anyone can reclaim */}
           {quest.status === "CLAIMED" && timedOut && (
-            <button className="pixel-btn w-full !bg-orange-600 !border-orange-700 hover:!bg-orange-500">
+            <button className="pixel-btn w-full" style={{ background: "hsl(17 100% 50%)", borderColor: "hsl(17 80% 40%)" }}>
               ⟳ Reclaim Quest
             </button>
           )}
 
-          {/* PENDING_REVIEW — creator approves or rejects */}
           {quest.status === "PENDING_REVIEW" && isCreator && (
             <div className="flex gap-3">
-              <button className="pixel-btn flex-1 !bg-emerald-600 !border-emerald-700 hover:!bg-emerald-500">
+              <button className="pixel-btn flex-1" style={{ background: "hsl(155 80% 35%)", borderColor: "hsl(155 60% 25%)" }}>
                 ✓ Approve Completion
               </button>
-              <button className="pixel-btn flex-1 !bg-red-600 !border-red-700 hover:!bg-red-500">
+              <button className="pixel-btn flex-1" style={{ background: "hsl(17 100% 50%)", borderColor: "hsl(17 80% 40%)" }}>
                 ✕ Reject Completion
               </button>
             </div>
@@ -105,14 +111,14 @@ export default function QuestDetail() {
 
         {/* Details */}
         <div className="border-t-2 border-primary/20 pt-6 space-y-3">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm items-center">
             <span className="text-muted-foreground font-pixel text-[8px]">Posted by</span>
             <span className="font-pixel text-[8px] text-foreground">{quest.poster}</span>
           </div>
           {quest.claimedBy && (
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm items-center">
               <span className="text-muted-foreground font-pixel text-[8px]">Claimed by</span>
-              <span className="font-pixel text-[8px] text-accent">{quest.claimedBy}</span>
+              <AgentMiniCard wallet={quest.claimedBy} />
             </div>
           )}
           <div className="flex justify-between text-sm">
