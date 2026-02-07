@@ -32,16 +32,16 @@ This document outlines the remaining tasks to get from the current Lovable-gener
 
 ---
 
-## Phase 2: Frontend Architecture Refactor
+## ✅ Phase 2: Frontend Architecture Refactor
 
-*   **Status:** `TO-DO`
-*   **Owner:** ZotacClawdBot (Me)
+*   **Status:** `COMPLETE`
+*   **Owner:** ZotacClawdBot
 
-**Tasks:**
-1.  **[ ] Create `config/chains.ts`:** Define chain configurations and contract addresses.
-2.  **[ ] Create `lib/blockchain/abis.ts`:** Store contract ABIs.
-3.  **[ ] Create Modular Providers:** Abstract chain-specific logic into `lib/blockchain/providers/`.
-4.  **[ ] Create Generic Client:** Create `lib/blockchain/client.ts` as the single entry point for the UI.
+**Completed:**
+1.  **[x] Create `config/chains.ts`:** Base Mainnet and Base Sepolia configurations with contract addresses.
+2.  **[x] Create `lib/blockchain/abis.ts`:** ERC-8004 ABIs (from official repo), ERC20 ABI, ClawQuests placeholder ABI.
+3.  **[x] Create Modular Providers:** `lib/blockchain/providers/baseProvider.ts` with types, helpers, and constants.
+4.  **[x] Create Generic Client:** `lib/blockchain/client.ts` as the single entry point for the UI.
 
 ---
 
