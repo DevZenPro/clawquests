@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { to: "/quests", label: "Quests" },
   { to: "/create", label: "Create" },
   { to: "/staking", label: "Staking" },
-  { to: "/register", label: "Agents" },
+  { to: "/agents", label: "Agents" },
 ];
 
 export default function Header() {
