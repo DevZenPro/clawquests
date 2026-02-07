@@ -25,6 +25,7 @@ import "../src/IClawQuests.sol";
 contract ClawQuestsTest is Test {
     ClawQuests public quests;
     MockERC20 public usdc;
+    MockERC721 public identityRegistry;
     
     address public treasury = address(0x1);
     address public creator = address(0x2);
@@ -38,11 +39,17 @@ contract ClawQuestsTest is Test {
     uint256 constant HUNDRED_USDC = 100e6;
 
     function setUp() public {
-        // Deploy mock USDC
+        // Deploy mocks
         usdc = new MockERC20("USD Coin", "USDC", 6);
+        identityRegistry = new MockERC721("Mock Identity", "MID");
         
         // Deploy ClawQuests
-        quests = new ClawQuests(address(usdc), treasury);
+        quests = new ClawQuests(address(usdc), treasury, address(identityRegistry));
+        
+        // Mint identities for agents and referrer
+        identityRegistry.mint(agent1, 1);
+        identityRegistry.mint(agent2, 2);
+        identityRegistry.mint(referrer, 3);
         
         // Fund test accounts
         usdc.mint(creator, 1000 * ONE_USDC);
@@ -58,6 +65,7 @@ contract ClawQuestsTest is Test {
         vm.prank(agent2);
         usdc.approve(address(quests), type(uint256).max);
     }
+
 
     // ============ Deployment Tests ============
 
@@ -788,6 +796,17 @@ contract ClawQuestsTest is Test {
         quests.cancelQuest(questId);
     }
 
+    function test_RevertWhen_UnregisteredAgentClaims() public {
+        uint256 questId = _createQuestWithStake();
+
+        // Use a new address that was not minted an identity in setUp()
+        address unregisteredAgent = address(0x6);
+
+        vm.prank(unregisteredAgent);
+        vm.expectRevert("Not a registered agent");
+        quests.claimQuest(questId);
+    }
+
     function test_RevertWhen_CreatorClaimsOwnQuest() public {
         uint256 questId = _createQuestWithStake();
 
@@ -1167,5 +1186,25 @@ contract MockERC20 {
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
         return true;
+    }
+}
+
+// ============ Mock ERC721 ============
+
+contract MockERC721 {
+    string public name;
+    string public symbol;
+    
+    mapping(address => uint256) public balanceOf;
+    mapping(uint256 => address) public ownerOf;
+    
+    constructor(string memory _name, string memory _symbol) {
+        name = _name;
+        symbol = _symbol;
+    }
+    
+    function mint(address to, uint256 tokenId) external {
+        ownerOf[tokenId] = to;
+        balanceOf[to]++;
     }
 }

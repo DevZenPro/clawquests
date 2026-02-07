@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -38,6 +39,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
     // ============ Constants ============
 
     address public immutable USDC;
+    IERC721 public immutable IDENTITY_REGISTRY;
     uint256 public constant MIN_STAKE_AMOUNT = 10e6;      // 10 USDC
     uint256 public constant CREATION_FEE = 0.1e6;         // 0.10 USDC
     uint256 public constant PLATFORM_FEE_BPS = 500;       // 5%
@@ -74,11 +76,13 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
 
     // ============ Constructor ============
 
-    constructor(address _usdc, address _treasury) ERC721("ClawQuests", "QUEST") Ownable(msg.sender) {
+    constructor(address _usdc, address _treasury, address _identityRegistry) ERC721("ClawQuests", "QUEST") Ownable(msg.sender) {
         require(_usdc != address(0), "Invalid USDC address");
         require(_treasury != address(0), "Invalid treasury address");
+        require(_identityRegistry != address(0), "Invalid identity registry");
         USDC = _usdc;
         treasury = _treasury;
+        IDENTITY_REGISTRY = IERC721(_identityRegistry);
     }
 
     // ============ Quest Management ============
@@ -305,6 +309,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
 
     function _claimQuestInternal(uint256 questId, address referrer) internal {
         Quest storage quest = _quests[questId];
+        require(IDENTITY_REGISTRY.balanceOf(msg.sender) > 0, "Not a registered agent");
         require(_ownerOf(questId) != address(0), "Quest does not exist");
         require(quest.status == QuestStatus.OPEN, "Quest not in OPEN status");
         require(msg.sender != quest.creator, "Creator cannot claim own quest");
