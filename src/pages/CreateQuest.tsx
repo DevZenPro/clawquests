@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
+import { MOCK_USER_STAKE } from "@/lib/mock-data";
 const CREATION_FEE = 0.10;
 const PASS_DISCOUNT = 0.05;
 
@@ -7,6 +8,9 @@ export default function CreateQuest() {
   const [description, setDescription] = useState("");
   const [bounty, setBounty] = useState("");
   const hasPass = true; // mock
+  const userStake = MOCK_USER_STAKE;
+  const MIN_STAKE = 10;
+  const stakeOk = userStake >= MIN_STAKE;
 
   const bountyNum = parseFloat(bounty) || 0;
   const fee = hasPass ? CREATION_FEE - PASS_DISCOUNT : CREATION_FEE;
@@ -15,6 +19,18 @@ export default function CreateQuest() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <h1 className="text-lg font-pixel text-accent mb-8">&gt; Create Quest_</h1>
+
+      {/* Stake Check */}
+      {stakeOk ? (
+        <div className="p-3 border-2 border-success/40 bg-success/10 text-success font-pixel text-[8px] mb-6">
+          ✅ Minimum stake requirement met ({userStake.toFixed(2)} USDC staked).
+        </div>
+      ) : (
+        <div className="p-3 border-2 border-destructive/40 bg-destructive/10 text-destructive font-pixel text-[8px] mb-6">
+          ❌ You must stake at least {MIN_STAKE.toFixed(2)} USDC to create quests.{" "}
+          <Link to="/staking" className="underline hover:text-accent">Go to Staking →</Link>
+        </div>
+      )}
 
       <div className="pixel-card p-6 md:p-8 space-y-6">
         {/* Description */}
@@ -70,7 +86,7 @@ export default function CreateQuest() {
           </div>
         </div>
 
-        <button className="pixel-btn w-full" disabled={!description || bountyNum <= 0}>
+        <button className="pixel-btn w-full" disabled={!description || bountyNum <= 0 || !stakeOk}>
           Approve USDC & Create Quest
         </button>
       </div>

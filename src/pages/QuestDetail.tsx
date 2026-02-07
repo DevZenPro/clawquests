@@ -1,7 +1,13 @@
 import { useParams, Link } from "react-router-dom";
-import { MOCK_QUESTS } from "@/lib/mock-data";
+import { MOCK_QUESTS, MOCK_CONNECTED_WALLET, MOCK_CONNECTED_AGENT_WALLET } from "@/lib/mock-data";
 import StatusBadge from "@/components/StatusBadge";
 import { useState } from "react";
+
+function isTimedOut(quest: (typeof MOCK_QUESTS)[0]) {
+  if (quest.status !== "CLAIMED" || !quest.claimedAt) return false;
+  const claimed = new Date(quest.claimedAt).getTime();
+  return Date.now() - claimed > 24 * 60 * 60 * 1000;
+}
 
 export default function QuestDetail() {
   const { id } = useParams();
@@ -17,6 +23,10 @@ export default function QuestDetail() {
       </div>
     );
   }
+
+  const isCreator = quest.poster === MOCK_CONNECTED_WALLET;
+  const isClaimant = quest.claimedBy === MOCK_CONNECTED_AGENT_WALLET;
+  const timedOut = isTimedOut(quest);
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
@@ -44,23 +54,54 @@ export default function QuestDetail() {
 
         {/* Result */}
         {quest.result && (
-          <div className="mb-6 p-4 bg-success/5 border-2 border-success/30">
-            <h3 className="text-[8px] font-pixel uppercase tracking-widest text-success mb-2">Result</h3>
+          <div className={`mb-6 p-4 border-2 ${quest.status === "COMPLETED" ? "bg-success/5 border-success/30" : "bg-purple-500/5 border-purple-500/30"}`}>
+            <h3 className={`text-[8px] font-pixel uppercase tracking-widest mb-2 ${quest.status === "COMPLETED" ? "text-success" : "text-purple-400"}`}>
+              {quest.status === "PENDING_REVIEW" ? "Submitted Result" : "Result"}
+            </h3>
             <p className="text-sm text-foreground leading-relaxed font-body">{quest.result}</p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="mb-6">
+        <div className="mb-6 space-y-3">
+          {/* OPEN — anyone can claim */}
           {quest.status === "OPEN" && (
             <button className="pixel-btn w-full">Claim Quest</button>
           )}
-          {quest.status === "CLAIMED" && (
+
+          {/* CLAIMED — claimant can submit result */}
+          {quest.status === "CLAIMED" && isClaimant && !timedOut && (
             <button onClick={() => setShowModal(true)} className="pixel-btn w-full">
-              Complete Quest
+              Submit Result
             </button>
           )}
+
+          {/* CLAIMED & timed out — anyone can reclaim */}
+          {quest.status === "CLAIMED" && timedOut && (
+            <button className="pixel-btn w-full !bg-orange-600 !border-orange-700 hover:!bg-orange-500">
+              ⟳ Reclaim Quest
+            </button>
+          )}
+
+          {/* PENDING_REVIEW — creator approves or rejects */}
+          {quest.status === "PENDING_REVIEW" && isCreator && (
+            <div className="flex gap-3">
+              <button className="pixel-btn flex-1 !bg-emerald-600 !border-emerald-700 hover:!bg-emerald-500">
+                ✓ Approve Completion
+              </button>
+              <button className="pixel-btn flex-1 !bg-red-600 !border-red-700 hover:!bg-red-500">
+                ✕ Reject Completion
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Timed out notice */}
+        {quest.status === "CLAIMED" && timedOut && (
+          <div className="mb-6 p-3 border-2 border-warning/40 bg-warning/10 text-warning font-pixel text-[8px] text-center">
+            ⚠ This quest has been claimed for over 24 hours and is eligible for reclaim.
+          </div>
+        )}
 
         {/* Details */}
         <div className="border-t-2 border-primary/20 pt-6 space-y-3">
@@ -89,7 +130,7 @@ export default function QuestDetail() {
         </div>
       </div>
 
-      {/* Complete Modal */}
+      {/* Submit Result Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90" onClick={() => setShowModal(false)}>
           <div className="pixel-card border-accent p-6 w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
