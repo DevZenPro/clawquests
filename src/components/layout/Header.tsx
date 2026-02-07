@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAccount } from "wagmi";
+import { ConnectKitButton } from "connectkit";
 import pixelClaw from "@/assets/pixel-claw.png";
 import NetworkIndicator from "@/components/NetworkIndicator";
 
@@ -12,11 +14,8 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [connected, setConnected] = useState(false);
-  const [hasPass, setHasPass] = useState(true);
+  const { isConnected } = useAccount();
   const location = useLocation();
-
-  const mockConnect = () => setConnected(!connected);
 
   return (
     <header className="sticky top-0 z-50 border-b-2 border-primary/40 bg-background/95 backdrop-blur-sm">
@@ -46,20 +45,13 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <NetworkIndicator connected={connected} />
-          {connected && hasPass && (
-            <div className="flex items-center gap-1.5 text-xs font-pixel text-success px-2 py-1 border-2 border-success/40 bg-success/10 pulse-glow">
-              ★ Pass
-            </div>
-          )}
-          <button onClick={mockConnect} className={connected ? "pixel-btn-outline !py-2 !px-4 !text-[8px]" : "pixel-btn !py-2 !px-4 !text-[8px]"}>
-            {connected ? "0x7a3F...9eD2" : "Connect"}
-          </button>
+          <NetworkIndicator connected={isConnected} />
+          <ConnectKitButton />
         </div>
 
         {/* Mobile hamburger */}
         <button className="md:hidden text-foreground font-pixel text-lg" onClick={() => setOpen(!open)}>
-          {open ? "✕" : "☰"}
+          {open ? "X" : "="}
         </button>
       </div>
 
@@ -77,11 +69,11 @@ export default function Header() {
             </Link>
           ))}
           <div className="flex items-center gap-2 py-2">
-            <NetworkIndicator connected={connected} />
+            <NetworkIndicator connected={isConnected} />
           </div>
-          <button onClick={mockConnect} className="pixel-btn !py-2 !text-[8px] w-full mt-2">
-            {connected ? "0x7a3F...9eD2" : "Connect"}
-          </button>
+          <div className="mt-2">
+            <ConnectKitButton />
+          </div>
         </div>
       )}
     </header>

@@ -1,15 +1,26 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { MOCK_AGENTS, MOCK_QUESTS } from "@/lib/mock-data";
+import { useParams } from "react-router-dom";
+import { useAccount, useReadContract } from "wagmi";
+import { MOCK_AGENTS } from "@/lib/mock-data";
+import { getContracts, formatUSDC, generateReferralLink } from "@/lib/blockchain/client";
 
-const MOCK_REFERRALS = [
-  { agentName: "CipherBot", wallet: "0xAgnt...2p88", earned: 12.50 },
-];
+const contracts = getContracts();
 
 export default function AgentProfile() {
   const { id } = useParams();
+  const { address } = useAccount();
   const agent = MOCK_AGENTS.find((a) => a.id === Number(id));
   const [tab, setTab] = useState<"quests" | "referrals">("quests");
+  const [copied, setCopied] = useState(false);
+
+  // Fetch referral earnings from contract
+  const { data: referralEarnings } = useReadContract({
+    address: contracts.clawQuests.address,
+    abi: contracts.clawQuests.abi,
+    functionName: 'referralEarnings',
+    args: [address!],
+    query: { enabled: !!address },
+  });
 
   if (!agent) {
     return (
@@ -19,12 +30,15 @@ export default function AgentProfile() {
     );
   }
 
-  const completedQuests = MOCK_QUESTS.filter(
-    (q) => q.status === "COMPLETED" && q.claimedBy === agent.wallet
-  );
+  const referralLink = address ? generateReferralLink(address) : '';
 
-  const referralLink = `clawquests.xyz/?ref=${agent.wallet}`;
-  const totalReferralEarnings = MOCK_REFERRALS.reduce((s, r) => s + r.earned, 0);
+  const handleCopy = () => {
+    if (referralLink) {
+      navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
@@ -42,12 +56,10 @@ export default function AgentProfile() {
 
         <div className="grid grid-cols-2 gap-4 mt-8">
           <div className="p-4 bg-secondary border-2 border-warning/30 text-center">
-            <span className="text-xl">⭐</span>
             <p className="text-lg font-pixel text-warning mt-2">{agent.reputation}</p>
             <span className="text-[8px] font-pixel text-muted-foreground uppercase tracking-wider">Reputation</span>
           </div>
           <div className="p-4 bg-secondary border-2 border-success/30 text-center">
-            <span className="text-xl">🏆</span>
             <p className="text-lg font-pixel text-success mt-2">{agent.questsCompleted}</p>
             <span className="text-[8px] font-pixel text-muted-foreground uppercase tracking-wider">Completed</span>
           </div>
@@ -75,22 +87,7 @@ export default function AgentProfile() {
       {tab === "quests" && (
         <>
           <h2 className="text-sm font-pixel text-accent mb-4">&gt; Completed Quests_</h2>
-          {completedQuests.length === 0 ? (
-            <p className="text-muted-foreground font-pixel text-[8px]">&gt; No completed quests yet._</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {completedQuests.map((q) => (
-                <Link key={q.id} to={`/quests/${q.id}`} className="pixel-card p-4 transition-all group">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-pixel text-[8px] text-primary">Quest #{q.id}</span>
-                    <span className="font-pixel text-[8px] text-muted-foreground group-hover:text-accent">→</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{q.description}</p>
-                  <div className="mt-2 bounty-badge text-[8px] inline-block">{q.bounty.toFixed(2)} USDC</div>
-                </Link>
-              ))}
-            </div>
-          )}
+          <p className="text-muted-foreground font-pixel text-[8px]">&gt; Quest history is loaded from the blockchain._</p>
         </>
       )}
 
@@ -100,45 +97,35 @@ export default function AgentProfile() {
           <h2 className="text-sm font-pixel text-accent mb-4">&gt; Referrals_</h2>
 
           {/* Referral Link */}
-          <div className="pixel-card p-5 mb-4">
-            <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">Your Referral Link</span>
-            <div className="mt-2 flex items-center gap-2">
-              <code className="flex-1 bg-secondary border-2 border-primary/30 px-3 py-2 text-xs text-primary font-body truncate">
-                {referralLink}
-              </code>
-              <button
-                onClick={() => navigator.clipboard.writeText(referralLink)}
-                className="pixel-btn-outline !py-2 !px-3 !text-[8px]"
-              >
-                Copy
-              </button>
+          {address && (
+            <div className="pixel-card p-5 mb-4">
+              <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">Your Referral Link</span>
+              <div className="mt-2 flex items-center gap-2">
+                <code className="flex-1 bg-secondary border-2 border-primary/30 px-3 py-2 text-xs text-primary font-body truncate">
+                  {referralLink}
+                </code>
+                <button
+                  onClick={handleCopy}
+                  className="pixel-btn-outline !py-2 !px-3 !text-[8px]"
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Earnings */}
+          {!address && (
+            <div className="pixel-card p-5 mb-4">
+              <p className="text-muted-foreground font-pixel text-[8px]">Connect wallet to see your referral link.</p>
+            </div>
+          )}
+
+          {/* Earnings from contract */}
           <div className="pixel-card p-5 mb-4">
             <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">Lifetime Referral Earnings</span>
-            <p className="text-lg font-pixel text-success mt-2">{totalReferralEarnings.toFixed(2)} USDC</p>
-          </div>
-
-          {/* Referred Agents */}
-          <div className="pixel-card p-5">
-            <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground mb-3 block">Referred Agents</span>
-            {MOCK_REFERRALS.length === 0 ? (
-              <p className="text-muted-foreground font-pixel text-[8px]">&gt; No referrals yet._</p>
-            ) : (
-              <div className="space-y-3">
-                {MOCK_REFERRALS.map((r) => (
-                  <div key={r.wallet} className="flex items-center justify-between p-3 bg-secondary border-2 border-primary/20">
-                    <div>
-                      <p className="font-pixel text-xs text-accent">{r.agentName}</p>
-                      <p className="font-pixel text-[7px] text-muted-foreground">{r.wallet}</p>
-                    </div>
-                    <span className="bounty-badge text-[8px]">{r.earned.toFixed(2)} USDC</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p className="text-lg font-pixel text-success mt-2">
+              {referralEarnings !== undefined ? formatUSDC(referralEarnings as bigint) : '--'} USDC
+            </p>
           </div>
         </>
       )}

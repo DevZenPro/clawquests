@@ -1,26 +1,88 @@
 import { useState } from "react";
-import { MOCK_QUESTS, ALL_TAGS, type QuestStatus, type SkillTag } from "@/lib/mock-data";
-import QuestCard from "@/components/QuestCard";
+import { Link } from "react-router-dom";
+import { useReadContract, useReadContracts } from "wagmi";
+import { getContracts, formatUSDC, QuestStatus, getQuestStatusLabel } from "@/lib/blockchain/client";
 
-const STATUS_FILTERS: (QuestStatus | "ALL")[] = ["ALL", "OPEN", "CLAIMED", "PENDING_REVIEW", "COMPLETED"];
+const contracts = getContracts();
+
+const STATUS_FILTERS = ["ALL", "OPEN", "CLAIMED", "PENDING_REVIEW", "COMPLETED"] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+
 const SORTS = ["Newest", "Highest Bounty"] as const;
 
 export default function Quests() {
-  const [filter, setFilter] = useState<QuestStatus | "ALL">("ALL");
+  const [filter, setFilter] = useState<StatusFilter>("ALL");
   const [sort, setSort] = useState<(typeof SORTS)[number]>("Newest");
-  const [selectedTags, setSelectedTags] = useState<SkillTag[]>([]);
-  const [showTagFilter, setShowTagFilter] = useState(false);
 
-  const toggleTag = (tag: SkillTag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+  // Fetch open quest IDs
+  const { data: openQuestIds, isLoading: idsLoading } = useReadContract({
+    address: contracts.clawQuests.address,
+    abi: contracts.clawQuests.abi,
+    functionName: 'getOpenQuests',
+  });
+
+  // Also fetch totalQuests to get all quest IDs (not just open)
+  const { data: totalQuests } = useReadContract({
+    address: contracts.clawQuests.address,
+    abi: contracts.clawQuests.abi,
+    functionName: 'totalQuests',
+  });
+
+  // Build array of all quest IDs to fetch details for
+  const allQuestIds: bigint[] = [];
+  if (totalQuests) {
+    for (let i = BigInt(0); i < totalQuests; i++) {
+      allQuestIds.push(i);
+    }
+  }
+
+  // Batch fetch quest details for all IDs
+  const { data: questResults, isLoading: detailsLoading } = useReadContracts({
+    contracts: allQuestIds.map((id) => ({
+      address: contracts.clawQuests.address,
+      abi: contracts.clawQuests.abi,
+      functionName: 'getQuest' as const,
+      args: [id] as const,
+    })),
+  });
+
+  // Parse quest data
+  const quests = (questResults || [])
+    .map((result, index) => {
+      if (result.status !== 'success' || !result.result) return null;
+      const [creator, claimer, title, description, bountyAmount, status, createdAt, claimedAt, deadline] =
+        result.result as [string, string, string, string, bigint, number, bigint, bigint, bigint];
+      return {
+        id: allQuestIds[index],
+        creator,
+        claimer,
+        title,
+        description,
+        bountyAmount,
+        status: status as QuestStatus,
+        createdAt,
+        claimedAt,
+        deadline,
+      };
+    })
+    .filter(Boolean);
+
+  // Filter
+  const statusMap: Record<string, QuestStatus> = {
+    OPEN: QuestStatus.OPEN,
+    CLAIMED: QuestStatus.CLAIMED,
+    PENDING_REVIEW: QuestStatus.PENDING_REVIEW,
+    COMPLETED: QuestStatus.COMPLETED,
   };
 
-  const filtered = MOCK_QUESTS
-    .filter((q) => filter === "ALL" || q.status === filter)
-    .filter((q) => selectedTags.length === 0 || selectedTags.some((t) => q.tags.includes(t)))
-    .sort((a, b) => sort === "Highest Bounty" ? b.bounty - a.bounty : b.id - a.id);
+  const filtered = quests
+    .filter((q) => filter === "ALL" || q.status === statusMap[filter])
+    .sort((a, b) => {
+      if (sort === "Highest Bounty") return Number(b.bountyAmount - a.bountyAmount);
+      return Number(b.id - a.id);
+    });
+
+  const isLoading = idsLoading || detailsLoading;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -42,16 +104,6 @@ export default function Quests() {
           </button>
         ))}
         <div className="ml-auto flex items-center gap-3">
-          <button
-            onClick={() => setShowTagFilter(!showTagFilter)}
-            className={`px-3 py-2 text-[8px] font-pixel uppercase tracking-wider border-2 transition-colors ${
-              showTagFilter || selectedTags.length > 0
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-primary/20 text-muted-foreground hover:border-primary/40"
-            }`}
-          >
-            Tags {selectedTags.length > 0 && `(${selectedTags.length})`}
-          </button>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
@@ -62,40 +114,43 @@ export default function Quests() {
         </div>
       </div>
 
-      {/* Tag Filter Dropdown */}
-      {showTagFilter && (
-        <div className="pixel-card p-4 mb-6">
-          <div className="flex flex-wrap gap-2">
-            {ALL_TAGS.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className={`px-3 py-1.5 text-[7px] font-pixel uppercase tracking-wider border transition-colors ${
-                  selectedTags.includes(tag)
-                    ? "border-primary bg-primary/20 text-primary"
-                    : "border-primary/20 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-            {selectedTags.length > 0 && (
-              <button
-                onClick={() => setSelectedTags([])}
-                className="px-3 py-1.5 text-[7px] font-pixel uppercase tracking-wider border border-destructive/40 text-destructive hover:bg-destructive/10 transition-colors"
-              >
-                Clear All
-              </button>
-            )}
-          </div>
+      {isLoading && (
+        <p className="text-center text-muted-foreground font-pixel text-xs py-20">&gt; Loading quests..._</p>
+      )}
+
+      {!isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map((q) => (
+            <div key={q.id.toString()} className="pixel-card p-5 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="font-pixel text-[8px] text-muted-foreground">Quest #{q.id.toString()}</span>
+                <span className={`px-2.5 py-0.5 text-[8px] font-pixel uppercase tracking-wider ${
+                  q.status === QuestStatus.OPEN ? "status-open" :
+                  q.status === QuestStatus.CLAIMED ? "status-claimed" :
+                  q.status === QuestStatus.PENDING_REVIEW ? "status-pending" :
+                  "status-completed"
+                }`}>
+                  {getQuestStatusLabel(q.status)}
+                </span>
+              </div>
+              <p className="text-sm text-foreground line-clamp-3 leading-relaxed flex-1">
+                {q.title || q.description}
+              </p>
+              <div className="flex items-center justify-between mt-auto pt-3 border-t-2 border-primary/20">
+                <span className="bounty-badge text-[8px]">{formatUSDC(q.bountyAmount)} USDC</span>
+                <span className="text-[8px] font-pixel text-muted-foreground">
+                  by {q.creator.slice(0, 6)}...{q.creator.slice(-4)}
+                </span>
+              </div>
+              <Link to={`/quests/${q.id.toString()}`} className="pixel-btn-outline !py-2 !text-[8px] text-center flex items-center justify-center gap-2">
+                View Quest &rarr;
+              </Link>
+            </div>
+          ))}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filtered.map((q) => <QuestCard key={q.id} quest={q} />)}
-      </div>
-
-      {filtered.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <p className="text-center text-muted-foreground font-pixel text-xs py-20">&gt; No quests found._</p>
       )}
     </div>
