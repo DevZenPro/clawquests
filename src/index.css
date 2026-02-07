@@ -6,13 +6,13 @@
   :root {
     /* Deep Space Blue background */
     --background: 240 67% 3%;
-    --foreground: 200 20% 88%;
+    --foreground: 200 15% 92%;
 
     --card: 240 50% 5%;
-    --card-foreground: 200 20% 88%;
+    --card-foreground: 200 15% 92%;
 
     --popover: 240 50% 5%;
-    --popover-foreground: 200 20% 88%;
+    --popover-foreground: 200 15% 92%;
 
     /* Base Blue */
     --primary: 222 100% 50%;
@@ -22,7 +22,7 @@
     --secondary-foreground: 200 20% 75%;
 
     --muted: 240 30% 7%;
-    --muted-foreground: 220 15% 45%;
+    --muted-foreground: 220 12% 58%;
 
     /* Electric Cyan accent */
     --accent: 183 100% 50%;
@@ -64,7 +64,8 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
-    font-size: 18px;
+    font-size: 20px;
+    letter-spacing: 0.02em;
   }
 
   h1, h2, h3, h4, h5, h6 {
