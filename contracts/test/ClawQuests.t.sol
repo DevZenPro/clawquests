@@ -700,6 +700,415 @@ contract ClawQuestsTest is Test {
         assertEq(quests.getOpenQuests().length, 0);
     }
 
+    // ============ Admin Function Tests ============
+
+    function test_WithdrawFees() public {
+        // Create a quest (generates CREATION_FEE)
+        uint256 questId = _createQuestWithStake();
+
+        // Complete the quest (generates platform fee)
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://result");
+        vm.prank(creator);
+        quests.approveCompletion(questId);
+
+        uint256 fees = quests.accumulatedFees();
+        assertTrue(fees > 0, "should have accumulated fees");
+
+        uint256 treasuryBalBefore = usdc.balanceOf(treasury);
+
+        // Owner withdraws fees
+        quests.withdrawFees();
+
+        assertEq(quests.accumulatedFees(), 0, "fees not zeroed after withdrawal");
+        assertEq(usdc.balanceOf(treasury), treasuryBalBefore + fees, "treasury didn't receive fees");
+    }
+
+    function test_SetTreasury() public {
+        address newTreasury = address(0xBEEF);
+        quests.setTreasury(newTreasury);
+        assertEq(quests.treasury(), newTreasury, "treasury not updated");
+    }
+
+    function test_RevertWhen_NonOwnerWithdrawsFees() public {
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.withdrawFees();
+    }
+
+    function test_RevertWhen_NonOwnerSetsTreasury() public {
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.setTreasury(address(0xBEEF));
+    }
+
+    function test_RevertWhen_SetTreasuryToZero() public {
+        vm.expectRevert();
+        quests.setTreasury(address(0));
+    }
+
+    function test_RevertWhen_WithdrawFeesWithNoFees() public {
+        vm.expectRevert();
+        quests.withdrawFees();
+    }
+
+    // ============ Access Control Tests ============
+
+    function test_RevertWhen_NonCreatorApproves() public {
+        uint256 questId = _createQuestWithStake();
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://result");
+
+        vm.prank(agent2);
+        vm.expectRevert();
+        quests.approveCompletion(questId);
+    }
+
+    function test_RevertWhen_NonCreatorRejects() public {
+        uint256 questId = _createQuestWithStake();
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://result");
+
+        vm.prank(agent2);
+        vm.expectRevert();
+        quests.rejectCompletion(questId, "bad");
+    }
+
+    function test_RevertWhen_NonCreatorCancels() public {
+        uint256 questId = _createQuestWithStake();
+
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.cancelQuest(questId);
+    }
+
+    function test_RevertWhen_CreatorClaimsOwnQuest() public {
+        uint256 questId = _createQuestWithStake();
+
+        vm.prank(creator);
+        vm.expectRevert();
+        quests.claimQuest(questId);
+    }
+
+    function test_RevertWhen_SelfReferral() public {
+        uint256 questId = _createQuestWithStake();
+
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.claimQuestWithReferral(questId, agent1);
+    }
+
+    function test_RevertWhen_ZeroAddressReferral() public {
+        uint256 questId = _createQuestWithStake();
+
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.claimQuestWithReferral(questId, address(0));
+    }
+
+    // ============ Input Validation Tests ============
+
+    function test_RevertWhen_TitleTooLong() public {
+        vm.startPrank(creator);
+        quests.stake(TEN_USDC);
+
+        string[] memory tags = new string[](1);
+        tags[0] = "test";
+
+        // 101 chars
+        bytes memory longTitle = new bytes(101);
+        for (uint256 i = 0; i < 101; i++) longTitle[i] = "A";
+
+        vm.expectRevert();
+        quests.createQuest(string(longTitle), "Desc", HUNDRED_USDC, tags, block.timestamp + 7 days);
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_DescriptionTooLong() public {
+        vm.startPrank(creator);
+        quests.stake(TEN_USDC);
+
+        string[] memory tags = new string[](1);
+        tags[0] = "test";
+
+        // 2001 chars
+        bytes memory longDesc = new bytes(2001);
+        for (uint256 i = 0; i < 2001; i++) longDesc[i] = "A";
+
+        vm.expectRevert();
+        quests.createQuest("Title", string(longDesc), HUNDRED_USDC, tags, block.timestamp + 7 days);
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_TooManySkillTags() public {
+        vm.startPrank(creator);
+        quests.stake(TEN_USDC);
+
+        string[] memory tags = new string[](6);
+        for (uint256 i = 0; i < 6; i++) tags[i] = "tag";
+
+        vm.expectRevert();
+        quests.createQuest("Title", "Desc", HUNDRED_USDC, tags, block.timestamp + 7 days);
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_StakeZeroAmount() public {
+        vm.prank(creator);
+        vm.expectRevert();
+        quests.stake(0);
+    }
+
+    function test_RevertWhen_UnstakeZeroAmount() public {
+        vm.prank(creator);
+        quests.stake(TEN_USDC);
+
+        vm.prank(creator);
+        vm.expectRevert();
+        quests.unstake(0);
+    }
+
+    function test_RevertWhen_UnstakeMoreThanStaked() public {
+        vm.prank(creator);
+        quests.stake(TEN_USDC);
+
+        vm.prank(creator);
+        vm.expectRevert();
+        quests.unstake(20 * ONE_USDC);
+    }
+
+    function test_RevertWhen_SubmitOnNonClaimedQuest() public {
+        uint256 questId = _createQuestWithStake();
+
+        // Quest is OPEN, not CLAIMED — should revert
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.submitResult(questId, "ipfs://result");
+    }
+
+    function test_RevertWhen_SubmitEmptyResultURI() public {
+        uint256 questId = _createQuestWithStake();
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.submitResult(questId, "");
+    }
+
+    function test_RevertWhen_ApproveNonPendingQuest() public {
+        uint256 questId = _createQuestWithStake();
+
+        // Quest is OPEN, not PENDING_REVIEW
+        vm.prank(creator);
+        vm.expectRevert();
+        quests.approveCompletion(questId);
+    }
+
+    function test_RevertWhen_RejectNonPendingQuest() public {
+        uint256 questId = _createQuestWithStake();
+
+        vm.prank(creator);
+        vm.expectRevert();
+        quests.rejectCompletion(questId, "nope");
+    }
+
+    function test_RevertWhen_GetNonExistentQuest() public {
+        vm.expectRevert();
+        quests.getQuest(999);
+    }
+
+    // ============ View Function Tests (additional) ============
+
+    function test_OpenQuestCount() public {
+        assertEq(quests.openQuestCount(), 0, "should start at 0");
+
+        uint256 questId = _createQuestWithStake();
+        assertEq(quests.openQuestCount(), 1, "should be 1 after creation");
+
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        assertEq(quests.openQuestCount(), 0, "should be 0 after claim");
+    }
+
+    function test_GetQuestsByClaimer() public {
+        // No quests claimed initially
+        uint256[] memory empty = quests.getQuestsByClaimer(agent1);
+        assertEq(empty.length, 0, "should start empty");
+
+        uint256 questId = _createQuestWithStake();
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+
+        uint256[] memory claimed = quests.getQuestsByClaimer(agent1);
+        assertEq(claimed.length, 1);
+        assertEq(claimed[0], questId);
+    }
+
+    // ============ Lifecycle & Flow Tests ============
+
+    function test_FullLifecycle() public {
+        // 1. Creator stakes
+        vm.prank(creator);
+        quests.stake(TEN_USDC);
+
+        // 2. Creator creates quest (50 USDC bounty)
+        vm.startPrank(creator);
+        string[] memory tags = new string[](1);
+        tags[0] = "full-test";
+        uint256 questId = quests.createQuest("Full Lifecycle", "End to end", 50 * ONE_USDC, tags, block.timestamp + 7 days);
+        vm.stopPrank();
+
+        // 3. Agent claims with referral
+        vm.prank(agent1);
+        quests.claimQuestWithReferral(questId, referrer);
+
+        // 4. Agent submits
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://final-result");
+
+        // 5. Snapshot balances before approval
+        uint256 agentBal = usdc.balanceOf(agent1);
+        uint256 referrerBal = usdc.balanceOf(referrer);
+        uint256 treasuryBal = usdc.balanceOf(treasury);
+
+        // 6. Creator approves
+        vm.prank(creator);
+        quests.approveCompletion(questId);
+
+        // 7. Verify payouts: 50 USDC bounty, 5% fee = 2.5 USDC, 20% referral = 0.5 USDC
+        assertEq(usdc.balanceOf(agent1) - agentBal, 47_500_000, "agent payout wrong"); // 47.5 USDC
+        assertEq(usdc.balanceOf(referrer) - referrerBal, 500_000, "referrer payout wrong"); // 0.5 USDC
+        assertEq(usdc.balanceOf(treasury) - treasuryBal, 2_000_000, "treasury payout wrong"); // 2 USDC
+
+        // 8. Verify stats
+        assertEq(quests.totalVolume(), 50 * ONE_USDC);
+        assertEq(quests.totalQuests(), 1);
+        assertEq(uint256(quests.getQuest(questId).status), uint256(IClawQuests.QuestStatus.COMPLETED));
+
+        // 9. Creator unstakes (no active quests now)
+        vm.prank(creator);
+        quests.unstake(TEN_USDC);
+        assertEq(quests.stakes(creator), 0);
+    }
+
+    function test_ReclaimThenReclaim() public {
+        uint256 questId = _createQuestWithStake();
+
+        // Agent1 claims
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+
+        // Timeout, reclaim
+        vm.warp(block.timestamp + 25 hours);
+        quests.reclaimQuest(questId);
+
+        // Quest is OPEN again — agent2 can claim
+        vm.prank(agent2);
+        quests.claimQuest(questId);
+
+        IClawQuests.Quest memory q = quests.getQuest(questId);
+        assertEq(q.claimer, agent2, "agent2 should be new claimer");
+        assertEq(uint256(q.status), uint256(IClawQuests.QuestStatus.CLAIMED));
+    }
+
+    function test_AccumulatedFeesTracking() public {
+        // accumulatedFees starts at 0
+        assertEq(quests.accumulatedFees(), 0);
+
+        // Create quest — adds CREATION_FEE
+        uint256 questId = _createQuestWithStake();
+        uint256 creationFee = quests.CREATION_FEE();
+        assertEq(quests.accumulatedFees(), creationFee, "creation fee not tracked");
+
+        // Complete quest — adds platform fee (after referral split)
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://result");
+        vm.prank(creator);
+        quests.approveCompletion(questId);
+
+        // Platform fee = 5 USDC, no referral so full fee goes to accumulated
+        uint256 platformFee = (HUNDRED_USDC * 500) / 10000;
+        assertEq(quests.accumulatedFees(), creationFee + platformFee, "platform fee not tracked");
+
+        // Withdraw and verify zeroed
+        quests.withdrawFees();
+        assertEq(quests.accumulatedFees(), 0, "fees not zeroed after withdrawal");
+    }
+
+    function test_MultipleStakeIncrements() public {
+        vm.startPrank(creator);
+        quests.stake(5 * ONE_USDC);
+        assertEq(quests.stakes(creator), 5 * ONE_USDC);
+
+        quests.stake(5 * ONE_USDC);
+        assertEq(quests.stakes(creator), TEN_USDC, "stakes should be additive");
+
+        quests.stake(10 * ONE_USDC);
+        assertEq(quests.stakes(creator), 20 * ONE_USDC, "stakes should accumulate");
+        vm.stopPrank();
+    }
+
+    // ============ Fuzz Tests ============
+
+    function testFuzz_StakeAndUnstake(uint256 amount) public {
+        // Bound to reasonable USDC amounts (1 USDC to 1M USDC)
+        amount = bound(amount, ONE_USDC, 1_000_000 * ONE_USDC);
+
+        usdc.mint(agent1, amount);
+        vm.prank(agent1);
+        usdc.approve(address(quests), amount);
+
+        vm.prank(agent1);
+        quests.stake(amount);
+        assertEq(quests.stakes(agent1), amount);
+
+        vm.prank(agent1);
+        quests.unstake(amount);
+        assertEq(quests.stakes(agent1), 0);
+    }
+
+    function testFuzz_BountyFeeCalculation(uint256 bounty) public {
+        // Bound bounty: min 1 USDC, max 10M USDC
+        bounty = bound(bounty, ONE_USDC, 10_000_000 * ONE_USDC);
+
+        // Fund creator with enough USDC
+        usdc.mint(creator, bounty + ONE_USDC);
+        vm.prank(creator);
+        usdc.approve(address(quests), type(uint256).max);
+
+        vm.startPrank(creator);
+        quests.stake(TEN_USDC);
+        string[] memory tags = new string[](1);
+        tags[0] = "fuzz";
+        uint256 questId = quests.createQuest("Fuzz", "Desc", bounty, tags, block.timestamp + 7 days);
+        vm.stopPrank();
+
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://fuzz");
+
+        uint256 agentBalBefore = usdc.balanceOf(agent1);
+        uint256 treasuryBalBefore = usdc.balanceOf(treasury);
+
+        vm.prank(creator);
+        quests.approveCompletion(questId);
+
+        uint256 expectedPlatformFee = (bounty * 500) / 10000;
+        uint256 expectedNetPayout = bounty - expectedPlatformFee;
+
+        assertEq(usdc.balanceOf(agent1) - agentBalBefore, expectedNetPayout, "fuzz: agent payout wrong");
+        assertEq(usdc.balanceOf(treasury) - treasuryBalBefore, expectedPlatformFee, "fuzz: treasury fee wrong");
+    }
+
     // ============ Helper Functions ============
 
     function _createQuestWithStake() internal returns (uint256) {
