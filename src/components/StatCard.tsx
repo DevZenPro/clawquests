@@ -1,34 +1,32 @@
-import { type LucideIcon } from "lucide-react";
-
 interface StatCardProps {
   label: string;
   value: string;
-  icon: LucideIcon;
-  variant?: "cyan" | "green" | "amber" | "default";
+  icon: string;
+  variant?: "blue" | "orange" | "green" | "default";
 }
 
-const glowMap = {
-  cyan: "cyber-card cyber-border-glow",
-  green: "cyber-card hover:border-success/50 hover:shadow-[var(--glow-green)]",
-  amber: "cyber-card hover:border-warning/50 hover:shadow-[var(--glow-amber)]",
-  default: "cyber-card",
+const borderHover = {
+  blue: "hover:border-primary",
+  orange: "hover:border-accent",
+  green: "hover:border-success",
+  default: "hover:border-accent",
 };
 
-const iconColor = {
-  cyan: "text-primary",
+const valueColor = {
+  blue: "text-primary",
+  orange: "text-accent",
   green: "text-success",
-  amber: "text-warning",
-  default: "text-muted-foreground",
+  default: "text-foreground",
 };
 
-export default function StatCard({ label, value, icon: Icon, variant = "default" }: StatCardProps) {
+export default function StatCard({ label, value, icon, variant = "default" }: StatCardProps) {
   return (
-    <div className={`${glowMap[variant]} p-6 rounded-lg`}>
+    <div className={`pixel-card p-5 ${borderHover[variant]}`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">{label}</span>
-        <Icon className={`h-5 w-5 ${iconColor[variant]}`} />
+        <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">{label}</span>
+        <span className="text-2xl" role="img">{icon}</span>
       </div>
-      <p className={`text-2xl font-mono font-bold ${iconColor[variant]} crt-text`}>{value}</p>
+      <p className={`text-lg font-pixel font-bold ${valueColor[variant]}`}>{value}</p>
     </div>
   );
 }
