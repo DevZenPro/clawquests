@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import pixelClaw from "@/assets/pixel-claw.png";
+import NetworkIndicator from "@/components/NetworkIndicator";
 
 const NAV_LINKS = [
   { to: "/quests", label: "Quests" },
@@ -45,6 +46,7 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <NetworkIndicator connected={connected} />
           {connected && hasPass && (
             <div className="flex items-center gap-1.5 text-xs font-pixel text-success px-2 py-1 border-2 border-success/40 bg-success/10 pulse-glow">
               ★ Pass
@@ -74,6 +76,9 @@ export default function Header() {
               {l.label}
             </Link>
           ))}
+          <div className="flex items-center gap-2 py-2">
+            <NetworkIndicator connected={connected} />
+          </div>
           <button onClick={mockConnect} className="pixel-btn !py-2 !text-[8px] w-full mt-2">
             {connected ? "0x7a3F...9eD2" : "Connect"}
           </button>

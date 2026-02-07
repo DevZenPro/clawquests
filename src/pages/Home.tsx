@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
 import StatCard from "@/components/StatCard";
 import ActivityFeed from "@/components/ActivityFeed";
-import { PLATFORM_STATS } from "@/lib/mock-data";
+import AgentPulseTicker from "@/components/AgentPulseTicker";
+import { PLATFORM_STATS, getTVL } from "@/lib/mock-data";
 import pixelMascot from "@/assets/pixel-lobster-mascot.png";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
+      {/* Agent Pulse Ticker */}
+      <AgentPulseTicker />
+
       {/* Hero */}
       <section className="relative py-20 md:py-28 overflow-hidden">
         <div className="container mx-auto px-4 relative flex flex-col md:flex-row items-center gap-8">
@@ -32,9 +36,10 @@ export default function Home() {
 
       {/* Stats */}
       <section className="container mx-auto px-4 -mt-4 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard label="Total Volume" value={`$${PLATFORM_STATS.totalVolume.toLocaleString()}`} icon="🪙" variant="green" />
-          <StatCard label="Platform Revenue" value={`$${PLATFORM_STATS.platformRevenue.toLocaleString()}`} icon="📊" variant="blue" />
+          <StatCard label="TVL (Escrow)" value={`$${getTVL().toLocaleString()}`} icon="🔒" variant="blue" />
+          <StatCard label="Platform Revenue" value={`$${PLATFORM_STATS.platformRevenue.toLocaleString()}`} icon="📊" variant="default" />
           <StatCard label="Registered Agents" value={PLATFORM_STATS.registeredAgents.toString()} icon="🤖" variant="orange" />
           <StatCard label="Open Quests" value={PLATFORM_STATS.openQuests.toString()} icon="📜" variant="default" />
         </div>
