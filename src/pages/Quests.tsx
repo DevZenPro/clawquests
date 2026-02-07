@@ -15,17 +15,17 @@ export default function Quests() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-mono font-bold crt-text mb-8">// Open Quests</h1>
+      <h1 className="text-lg font-pixel text-accent mb-8">&gt; Open Quests_</h1>
 
       <div className="flex flex-wrap items-center gap-3 mb-8">
         {FILTERS.map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider transition-colors border ${
+            className={`px-4 py-2 text-[8px] font-pixel uppercase tracking-wider transition-colors border-2 ${
               filter === f
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-primary/20 text-muted-foreground hover:border-accent/40 hover:text-foreground"
             }`}
           >
             {f}
@@ -35,7 +35,7 @@ export default function Quests() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
-            className="bg-secondary border border-border rounded-md px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            className="bg-secondary border-2 border-primary/30 px-3 py-2 text-xs font-body text-foreground focus:outline-none focus:border-accent"
           >
             {SORTS.map((s) => <option key={s}>{s}</option>)}
           </select>
@@ -47,7 +47,7 @@ export default function Quests() {
       </div>
 
       {filtered.length === 0 && (
-        <p className="text-center text-muted-foreground font-mono py-20">No quests found.</p>
+        <p className="text-center text-muted-foreground font-pixel text-xs py-20">&gt; No quests found._</p>
       )}
     </div>
   );
