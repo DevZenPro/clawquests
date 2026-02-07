@@ -1,133 +1,90 @@
-# ClawQuests — Multi-Agent Build Guide
+# ClawQuests
 
 **Project:** Onchain quest marketplace for AI agents on Base
 **Repo:** `git@github.com:DevZenPro/clawquests.git`
 
 ---
 
-## 🎯 Project Overview
+## Phase Status
 
-ClawQuests is a fully onchain quest marketplace where:
-- **Creators** post bounties for tasks (in USDC)
-- **AI Agents** claim and complete quests
-- **Referrers** earn 20% of platform fees from referred agents
+| Phase | Status |
+|-------|--------|
+| 0. Architecture | Done |
+| 1. Smart Contracts | Done (29/29 tests passing) |
+| 2. Frontend Infra | Done |
+| 3. Frontend Integration | Done (wagmi/connectkit wired) |
+| 4. Deployment | Pending |
+| 5. Launch | Pending |
 
-### Key Features
-- ERC721 quest NFTs with onchain SVG metadata
-- USDC bounties with 5% platform fee
-- Perpetual referral system
-- Staking requirement for spam prevention
-- 24-hour claim timeout protection
+### Deployment Checklist
+
+- [x] All contract tests pass (29/29)
+- [x] Frontend builds without errors
+- [ ] Deploy to Base Sepolia
+- [ ] Verify contract on BaseScan
+- [ ] Update `src/config/chains.ts` with deployed address
+- [ ] E2E test on testnet
+- [ ] Deploy to Base Mainnet
+- [ ] Deploy frontend to Vercel
 
 ---
 
-## 🤖 Agent Deployment Guide
-
-This project is designed for **multi-agent parallel development**. Each agent has its own CLAUDE.md with complete specifications.
-
-### Agent 1: Smart Contract Developer
-
-**Directory:** `/contracts`
-**CLAUDE.md:** `contracts/CLAUDE.md`
+## Environment
 
 ```bash
-# Run from project root
-cd /home/ops/projects/clawquests/contracts
-claude "Implement all TODO functions in ClawQuests.sol and all tests in ClawQuests.t.sol. Run forge test until all pass."
+# Foundry (forge needs explicit PATH)
+export PATH="$HOME/.foundry/bin:$PATH"
+forge test -vvv                          # from contracts/
+forge test --gas-report
+
+# Frontend
+npm run dev
+npm run build
 ```
 
-**Deliverables:**
-- Complete `src/ClawQuests.sol` implementation
-- Complete `test/ClawQuests.t.sol` tests
-- All tests passing
+Note: zoxide `cd` hook causes errors in subshells — wrap with `bash -c` if needed.
 
 ---
 
-### Agent 2: Frontend Integrator
-
-**Directory:** `/src`  
-**CLAUDE.md:** `src/CLAUDE.md`
-
-```bash
-# Run from project root
-cd /home/ops/projects/clawquests
-claude "Wire up all React components to the blockchain using wagmi. Follow src/CLAUDE.md."
-```
-
-**Deliverables:**
-- Web3Provider setup
-- All pages integrated with contract reads/writes
-- Working wallet connection
-
----
-
-### Agent 3: Deploy Agent (Run After 1 & 2)
-
-**Directory:** `/contracts`
-
-```bash
-cd /home/ops/projects/clawquests/contracts
-claude "Deploy ClawQuests.sol to Base Sepolia. Use forge script. USDC address: 0x036CbD53842c5426634e7929541eC2318f3dCF7e. Treasury: [deployer address]. Verify on BaseScan."
-```
-
-**Deliverables:**
-- Deployed contract address
-- Verified on BaseScan
-- Updated `src/config/chains.ts` with address
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 clawquests/
-├── CLAUDE.md                 # This file (coordinator)
+├── CLAUDE.md                 # This file
 ├── contracts/
-│   ├── CLAUDE.md             # Smart contract agent guide
+│   ├── CLAUDE.md             # Contract implementation spec
 │   ├── src/
-│   │   ├── IClawQuests.sol   # ✅ Interface (spec)
-│   │   └── ClawQuests.sol    # 🔧 Implementation
+│   │   ├── IClawQuests.sol   # Interface (DO NOT MODIFY)
+│   │   └── ClawQuests.sol    # Implementation (complete)
 │   ├── test/
-│   │   └── ClawQuests.t.sol  # 🔧 Tests
+│   │   └── ClawQuests.t.sol  # 29 tests (all passing)
 │   └── foundry.toml
 ├── src/
-│   ├── CLAUDE.md             # Frontend agent guide
-│   ├── config/chains.ts      # ✅ Chain configs
-│   ├── lib/blockchain/       # ✅ ABIs & client
-│   ├── pages/                # 🔧 Wire up
-│   └── components/           # 🔧 Wire up
+│   ├── CLAUDE.md             # Frontend integration spec
+│   ├── providers/Web3Provider.tsx  # WagmiProvider + ConnectKit
+│   ├── config/chains.ts      # Chain configs (addresses TBD)
+│   ├── lib/blockchain/       # ABIs, client utils, types
+│   ├── pages/                # All wired with wagmi hooks
+│   └── components/           # UI components
 └── package.json
 ```
 
 ---
 
-## ✅ Phase Status
-
-| Phase | Status | Agent |
-|-------|--------|-------|
-| 0. Architecture | ✅ Complete | - |
-| 1. Smart Contracts | 🔧 Ready | Contract Agent |
-| 2. Frontend Infra | ✅ Complete | - |
-| 3. Frontend Integration | 🔧 Ready | Frontend Agent |
-| 4. Deployment | ⏳ Waiting | Deploy Agent |
-| 5. Launch | ⏳ Waiting | - |
-
----
-
-## 🔑 Key Constants
+## Key Constants
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| MIN_STAKE | 10 USDC | Required to create quests |
-| CREATION_FEE | 0.10 USDC | Per quest |
-| PLATFORM_FEE | 5% | Of bounty on completion |
-| REFERRAL_SHARE | 20% | Of platform fee |
+| MIN_STAKE | 10 USDC (10e6) | Required to create quests |
+| CREATION_FEE | 0.10 USDC (0.1e6) | Per quest |
+| PLATFORM_FEE | 5% (500 bps) | Of bounty on completion |
+| REFERRAL_SHARE | 20% (2000 bps) | Of platform fee |
 | CLAIM_TIMEOUT | 24 hours | Before reclaim allowed |
-| MIN_BOUNTY | 1 USDC | Minimum bounty |
+| MIN_BOUNTY | 1 USDC (1e6) | Minimum bounty |
 
 ---
 
-## 🔗 Contract Addresses
+## Contract Addresses
 
 ### Base Sepolia (Testnet)
 ```
@@ -147,36 +104,7 @@ ClawQuests: TBD (after deployment)
 
 ---
 
-## 🧪 Testing
+## Changelog
 
-### Smart Contracts
-```bash
-cd contracts
-forge test -vvv
-forge test --gas-report
-```
-
-### Frontend
-```bash
-npm run dev
-npm run typecheck
-npm run build
-```
-
----
-
-## 🚀 Deployment Checklist
-
-- [ ] All contract tests pass
-- [ ] Frontend builds without errors
-- [ ] Deploy to Base Sepolia
-- [ ] Verify contract on BaseScan
-- [ ] Update chain config with address
-- [ ] E2E test on testnet
-- [ ] Deploy to Base Mainnet
-- [ ] Update chain config with mainnet address
-- [ ] Deploy frontend to Vercel
-
----
-
-Good luck building! 🦞
+All changes are tracked in `.claude/memory/CHANGELOG.md` (auto-loaded by Claude).
+When making changes, append an entry with the date and summary.

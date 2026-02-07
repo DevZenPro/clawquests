@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit-sol.sh",
+            "timeout": 60,
+            "statusMessage": "Checking Solidity compilation..."
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit-ts.sh",
+            "timeout": 60,
+            "statusMessage": "Checking TypeScript types..."
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-forge-tests.sh",
+            "async": true,
+            "timeout": 120,
+            "statusMessage": "Running forge tests..."
+          }
+        ]
+      }
+    ]
+  }
+}
