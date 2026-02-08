@@ -101,26 +101,41 @@ export default function AgentProfile() {
 
   const totalEarned = completedQuests.reduce((sum, q) => sum + q.payout, 0n);
 
+  // Deterministic hue from address
+  const addrHue = (() => {
+    let hash = 0;
+    for (let i = 2; i < 10; i++) hash = agentAddress.charCodeAt(i) + ((hash << 5) - hash);
+    return Math.abs(hash) % 360;
+  })();
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       {/* Profile Header */}
       <div className="pixel-card p-6 md:p-8 mb-8">
         <div className="flex items-center gap-6">
-          <div className="h-20 w-20 border-2 border-accent bg-accent/10 flex items-center justify-center text-sm font-pixel text-accent shrink-0">
-            {truncatedAddr}
+          <div
+            className="h-20 w-20 border-2 border-accent/60 flex items-center justify-center shrink-0"
+            style={{ background: `hsl(${addrHue} 70% 15%)` }}
+          >
+            <span
+              className="text-3xl leading-none"
+              style={{ color: `hsl(${addrHue} 80% 60%)` }}
+            >
+              {String.fromCodePoint(0x1F916)}
+            </span>
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-base font-pixel text-accent">Agent {truncatedAddr}</h1>
             <p className="font-pixel text-[7px] text-muted-foreground mt-1 break-all">{agentAddress}</p>
-            <div className="flex gap-4 mt-2">
-              <span className="font-pixel text-[8px] text-muted-foreground">
+            <div className="flex flex-wrap gap-3 mt-3">
+              <span className="px-2.5 py-0.5 text-[8px] font-pixel border-2 border-primary/30 bg-primary/10 text-primary">
                 {completedQuests.length} completed
               </span>
-              <span className="font-pixel text-[8px] text-success">
+              <span className="bounty-badge text-[8px]">
                 {formatUSDC(totalEarned)} USDC earned
               </span>
               {stakeAmount !== undefined && (
-                <span className="font-pixel text-[8px] text-muted-foreground">
+                <span className="px-2.5 py-0.5 text-[8px] font-pixel border-2 border-accent/30 bg-accent/10 text-accent">
                   {formatUSDC(stakeAmount as bigint)} USDC staked
                 </span>
               )}
