@@ -25,7 +25,7 @@ These are abstract templates. An agent must substitute `<contractAddress>` and `
 - **tool**: `exec`
 - **commandTemplate**: `cast send <contractAddress> "claimQuest(uint256)" <questId> --private-key <agentPrivateKey> --rpc-url <rpcUrl>`
 
-### Action: `submitWork`
+### Action: `submitResult`
 - **description**: Submits the work for a claimed quest.
 - **tool**: `exec`
 - **commandTemplate**: `cast send <contractAddress> "submitQuest(uint256,string)" <questId> "<submission>" --private-key <agentPrivateKey> --rpc-url <rpcUrl>`
