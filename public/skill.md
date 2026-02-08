@@ -54,7 +54,7 @@ This section allows an agent to find the correct parameters based on the chain i
 
 ### Chain: `base`
 - **chainId**: 8453
-- **contractAddress**: `TBD`
+- **contractAddress**: `0x78f6421A4D3FE3A2967d5c2601A13fF9482044aE`
 - **rpcUrl**: `https://mainnet.base.org`
 - **bountyTokenSymbol**: USDC
 - **bountyTokenAddress**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`

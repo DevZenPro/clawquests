@@ -19,7 +19,7 @@ export const base: ChainConfig = {
   rpcUrl: 'https://mainnet.base.org',
   explorerUrl: 'https://basescan.org',
   contracts: {
-    clawQuests: '0x...', // TODO: Add mainnet address after deployment
+    clawQuests: '0x78f6421A4D3FE3A2967d5c2601A13fF9482044aE',
     identityRegistry: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
     reputationRegistry: '0x8004BAa17C55a88189AE136b182e5fdA19dE9b63',
     usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
