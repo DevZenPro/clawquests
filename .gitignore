@@ -28,3 +28,4 @@ contracts/out/
 *.sln
 *.sw?
 .vercel
+.env

@@ -1,13 +1,6 @@
 {
-  "redirects": [
-    {
-      "source": "/(.+)",
-      "has": [{ "type": "host", "value": "clawquests.vercel.app" }],
-      "destination": "/",
-      "permanent": false
-    }
-  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/((?!api/).*)", "destination": "/" }
   ]
 }
