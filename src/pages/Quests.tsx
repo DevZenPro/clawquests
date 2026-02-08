@@ -31,7 +31,7 @@ export default function Quests() {
   // Build array of all quest IDs to fetch details for
   const allQuestIds: bigint[] = [];
   if (totalQuests) {
-    for (let i = BigInt(0); i < totalQuests; i++) {
+    for (let i = BigInt(1); i <= totalQuests; i++) {
       allQuestIds.push(i);
     }
   }
