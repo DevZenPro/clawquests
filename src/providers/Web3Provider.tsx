@@ -8,13 +8,13 @@ const config = createConfig(
     chains: [base, baseSepolia],
     transports: {
       [base.id]: fallback([
-        http('https://mainnet.base.org'),
+        http('https://base-rpc.publicnode.com'),
         http('https://1rpc.io/base'),
-        http('https://base.llamarpc.com'),
+        http('https://mainnet.base.org'),
       ]),
       [baseSepolia.id]: fallback([
-        http('https://sepolia.base.org'),
         http('https://base-sepolia-rpc.publicnode.com'),
+        http('https://sepolia.base.org'),
       ]),
     },
     walletConnectProjectId: import.meta.env.VITE_WC_PROJECT_ID || '',
