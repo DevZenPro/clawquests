@@ -31,7 +31,7 @@ export const base: ChainConfig = {
 export const baseSepolia: ChainConfig = {
   id: 84532,
   name: 'Base Sepolia',
-  rpcUrl: 'https://sepolia.base.org',  // Public RPC (Alchemy key expired)
+  rpcUrl: 'https://base-sepolia.drpc.org',  // dRPC (public Base RPC is unreliable)
   explorerUrl: 'https://sepolia.basescan.org',
   deployBlock: 37_000_000n,
   contracts: {

@@ -7,7 +7,7 @@ import { getContracts, getDeployBlock, DEFAULT_CHAIN_ID } from "@/lib/blockchain
 // Create a standalone public client that works without wallet connection
 const publicClient = createPublicClient({
   chain: baseSepolia,
-  transport: http('https://sepolia.base.org'),
+  transport: http('https://base-sepolia.drpc.org'),
 });
 
 interface AgentInfo {

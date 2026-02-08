@@ -3,12 +3,12 @@ import { baseSepolia } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
 
-// The app will now only connect to Base Sepolia, using public RPC.
+// The app will now only connect to Base Sepolia, using dRPC (more reliable).
 const config = createConfig(
   getDefaultConfig({
     chains: [baseSepolia],
     transports: {
-      [baseSepolia.id]: http('https://sepolia.base.org'),
+      [baseSepolia.id]: http('https://base-sepolia.drpc.org'),
     },
     walletConnectProjectId: import.meta.env.VITE_WC_PROJECT_ID || '',
     appName: 'ClawQuests',
