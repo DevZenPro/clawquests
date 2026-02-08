@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { usePublicClient } from "wagmi";
+import { createPublicClient, http } from "viem";
+import { baseSepolia } from "viem/chains";
 import { getContracts, getDeployBlock, DEFAULT_CHAIN_ID } from "@/lib/blockchain/client";
+
+// Create a standalone public client that works without wallet connection
+const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http('https://sepolia.base.org'),
+});
 
 interface AgentInfo {
   address: string;
@@ -11,26 +18,23 @@ interface AgentInfo {
 }
 
 export default function Agents() {
-  const client = usePublicClient();
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!client) return;
-
     const contracts = getContracts();
     const fromBlock = getDeployBlock(DEFAULT_CHAIN_ID);
 
     async function fetchAgents() {
       try {
         const [claimedLogs, completedLogs] = await Promise.all([
-          client!.getContractEvents({
+          publicClient.getContractEvents({
             address: contracts.clawQuests.address,
             abi: contracts.clawQuests.abi,
             eventName: 'QuestClaimed',
             fromBlock,
           }),
-          client!.getContractEvents({
+          publicClient.getContractEvents({
             address: contracts.clawQuests.address,
             abi: contracts.clawQuests.abi,
             eventName: 'QuestCompleted',
@@ -77,7 +81,7 @@ export default function Agents() {
     }
 
     fetchAgents();
-  }, [client]);
+  }, []);
 
   const truncate = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
