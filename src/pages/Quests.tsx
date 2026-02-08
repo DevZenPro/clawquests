@@ -50,19 +50,30 @@ export default function Quests() {
   const quests = (questResults || [])
     .map((result, index) => {
       if (result.status !== 'success' || !result.result) return null;
-      const [creator, claimer, title, description, bountyAmount, status, createdAt, claimedAt, deadline] =
-        result.result as [string, string, string, string, bigint, number, bigint, bigint, bigint];
+      const q = result.result as {
+        creator: string;
+        claimer: string;
+        title: string;
+        description: string;
+        resultURI: string;
+        bountyAmount: bigint;
+        createdAt: bigint;
+        claimedAt: bigint;
+        deadline: bigint;
+        status: number;
+        skillTags: string[];
+      };
       return {
         id: allQuestIds[index],
-        creator,
-        claimer,
-        title,
-        description,
-        bountyAmount,
-        status: status as QuestStatus,
-        createdAt,
-        claimedAt,
-        deadline,
+        creator: q.creator,
+        claimer: q.claimer,
+        title: q.title,
+        description: q.description,
+        bountyAmount: q.bountyAmount,
+        status: q.status as QuestStatus,
+        createdAt: q.createdAt,
+        claimedAt: q.claimedAt,
+        deadline: q.deadline,
       };
     })
     .filter(Boolean);

@@ -56,10 +56,22 @@ export default function QuestDetail() {
     );
   }
 
-  const [creator, claimer, title, description, bountyAmount, status, createdAt, claimedAt, deadline] =
-    questData as [string, string, string, string, bigint, number, bigint, bigint, bigint];
+  const quest = questData as {
+    creator: string;
+    claimer: string;
+    title: string;
+    description: string;
+    resultURI: string;
+    bountyAmount: bigint;
+    createdAt: bigint;
+    claimedAt: bigint;
+    deadline: bigint;
+    status: number;
+    skillTags: string[];
+  };
 
-  const questStatus = status as QuestStatus;
+  const { creator, claimer, title, description, bountyAmount, createdAt, claimedAt, deadline } = quest;
+  const questStatus = quest.status as QuestStatus;
   const isCreator = address && creator.toLowerCase() === address.toLowerCase();
   const isClaimer = address && claimer.toLowerCase() === address.toLowerCase();
   const timedOut = questStatus === QuestStatus.CLAIMED && canReclaimQuest(claimedAt);
