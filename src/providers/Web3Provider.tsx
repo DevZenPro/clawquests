@@ -1,21 +1,14 @@
-import { WagmiProvider, createConfig, http, fallback } from 'wagmi'
-import { base, baseSepolia } from 'wagmi/chains'
+import { WagmiProvider, createConfig, http } from 'wagmi'
+import { baseSepolia } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
 
+// The app will now only connect to Base Sepolia, using the reliable Alchemy RPC.
 const config = createConfig(
   getDefaultConfig({
-    chains: [base, baseSepolia],
+    chains: [baseSepolia],
     transports: {
-      [base.id]: fallback([
-        http('https://base-rpc.publicnode.com'),
-        http('https://1rpc.io/base'),
-        http('https://mainnet.base.org'),
-      ]),
-      [baseSepolia.id]: fallback([
-        http('https://base-sepolia-rpc.publicnode.com'),
-        http('https://sepolia.base.org'),
-      ]),
+      [baseSepolia.id]: http('https://base-sepolia.g.alchemy.com/v2/jxHvQTxa0gRjAen727j6_'),
     },
     walletConnectProjectId: import.meta.env.VITE_WC_PROJECT_ID || '',
     appName: 'ClawQuests',
