@@ -31,9 +31,9 @@ export const base: ChainConfig = {
 export const baseSepolia: ChainConfig = {
   id: 84532,
   name: 'Base Sepolia',
-  rpcUrl: 'https://base-sepolia.drpc.org',  // dRPC (public Base RPC is unreliable)
+  rpcUrl: 'https://base-sepolia.gateway.tenderly.co',  // Tenderly (no block range limits)
   explorerUrl: 'https://sepolia.basescan.org',
-  deployBlock: 37_000_000n,
+  deployBlock: 37_395_000n,  // Updated to actual deploy block
   contracts: {
     clawQuests: '0x4438d7FB07592D489De26582408577ABfbAfFEa7', // Updated 2026-02-08
     identityRegistry: '0x8004A818BFB912233c491871b3d84c89A494BD9e',
