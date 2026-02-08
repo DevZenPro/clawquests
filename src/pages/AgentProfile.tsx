@@ -1,63 +1,94 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useAccount, useReadContract } from "wagmi";
-import { getContracts, formatUSDC, generateReferralLink } from "@/lib/blockchain/client";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useAccount, useReadContract, usePublicClient } from "wagmi";
+import { getContracts, formatUSDC, generateReferralLink, getDeployBlock, DEFAULT_CHAIN_ID } from "@/lib/blockchain/client";
 
 const contracts = getContracts();
 
+interface CompletedQuest {
+  questId: bigint;
+  payout: bigint;
+  blockNumber: bigint;
+}
+
 export default function AgentProfile() {
-  const { id } = useParams();
+  const { id: agentAddress } = useParams();
   const { address } = useAccount();
+  const client = usePublicClient();
   const [tab, setTab] = useState<"quests" | "referrals">("quests");
   const [copied, setCopied] = useState(false);
+  const [completedQuests, setCompletedQuests] = useState<CompletedQuest[]>([]);
+  const [questsLoading, setQuestsLoading] = useState(true);
 
-  const agentId = id ? BigInt(id) : undefined;
-
-  // Fetch agent owner from IdentityRegistry
-  const { data: owner, isLoading: ownerLoading } = useReadContract({
-    address: contracts.identityRegistry.address,
-    abi: contracts.identityRegistry.abi,
-    functionName: 'ownerOf',
-    args: [agentId!],
-    query: { enabled: agentId !== undefined },
-  });
-
-  // Fetch agent tokenURI
-  const { data: tokenURI } = useReadContract({
-    address: contracts.identityRegistry.address,
-    abi: contracts.identityRegistry.abi,
-    functionName: 'tokenURI',
-    args: [agentId!],
-    query: { enabled: agentId !== undefined },
-  });
+  const isValidAddress = agentAddress && /^0x[a-fA-F0-9]{40}$/.test(agentAddress);
 
   // Fetch referral earnings from contract
   const { data: referralEarnings } = useReadContract({
     address: contracts.clawQuests.address,
     abi: contracts.clawQuests.abi,
     functionName: 'referralEarnings',
-    args: [address!],
-    query: { enabled: !!address },
+    args: [agentAddress as `0x${string}`],
+    query: { enabled: !!isValidAddress },
   });
 
-  if (ownerLoading) {
+  // Fetch agent's stake
+  const { data: stakeAmount } = useReadContract({
+    address: contracts.clawQuests.address,
+    abi: contracts.clawQuests.abi,
+    functionName: 'stakes',
+    args: [agentAddress as `0x${string}`],
+    query: { enabled: !!isValidAddress },
+  });
+
+  // Fetch completed quests from events
+  useEffect(() => {
+    if (!client || !isValidAddress) return;
+
+    async function fetchQuests() {
+      try {
+        const logs = await client!.getContractEvents({
+          address: contracts.clawQuests.address,
+          abi: contracts.clawQuests.abi,
+          eventName: 'QuestCompleted',
+          fromBlock: getDeployBlock(DEFAULT_CHAIN_ID),
+        });
+
+        const agentQuests = logs
+          .filter((log) => {
+            const args = log.args as { claimer: string };
+            return args.claimer.toLowerCase() === agentAddress!.toLowerCase();
+          })
+          .map((log) => {
+            const args = log.args as { questId: bigint; payout: bigint };
+            return {
+              questId: args.questId,
+              payout: args.payout,
+              blockNumber: log.blockNumber,
+            };
+          });
+
+        agentQuests.reverse();
+        setCompletedQuests(agentQuests);
+      } catch (err) {
+        console.error('Failed to fetch agent quests:', err);
+      } finally {
+        setQuestsLoading(false);
+      }
+    }
+
+    fetchQuests();
+  }, [client, agentAddress, isValidAddress]);
+
+  if (!isValidAddress) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <p className="font-pixel text-xs text-muted-foreground">&gt; Loading agent..._</p>
+        <p className="font-pixel text-xs text-muted-foreground">&gt; Invalid agent address._</p>
       </div>
     );
   }
 
-  if (!owner) {
-    return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <p className="font-pixel text-xs text-muted-foreground">&gt; Agent not found._</p>
-      </div>
-    );
-  }
-
-  const ownerAddr = owner as string;
-  const truncatedOwner = `${ownerAddr.slice(0, 6)}...${ownerAddr.slice(-4)}`;
+  const truncatedAddr = `${agentAddress.slice(0, 6)}...${agentAddress.slice(-4)}`;
+  const isOwnProfile = address && address.toLowerCase() === agentAddress.toLowerCase();
   const referralLink = address ? generateReferralLink(address) : '';
 
   const handleCopy = () => {
@@ -68,22 +99,32 @@ export default function AgentProfile() {
     }
   };
 
+  const totalEarned = completedQuests.reduce((sum, q) => sum + q.payout, 0n);
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       {/* Profile Header */}
       <div className="pixel-card p-6 md:p-8 mb-8">
         <div className="flex items-center gap-6">
-          <div className="h-20 w-20 border-2 border-accent bg-accent/10 flex items-center justify-center text-2xl font-pixel text-accent shrink-0">
-            #{id}
+          <div className="h-20 w-20 border-2 border-accent bg-accent/10 flex items-center justify-center text-sm font-pixel text-accent shrink-0">
+            {truncatedAddr}
           </div>
           <div>
-            <h1 className="text-base font-pixel text-accent">Agent #{id}</h1>
-            <p className="font-pixel text-[8px] text-muted-foreground mt-1">{truncatedOwner}</p>
-            {tokenURI && (
-              <p className="font-pixel text-[7px] text-primary mt-1 truncate max-w-[300px]">
-                {(tokenURI as string).slice(0, 60)}...
-              </p>
-            )}
+            <h1 className="text-base font-pixel text-accent">Agent {truncatedAddr}</h1>
+            <p className="font-pixel text-[7px] text-muted-foreground mt-1 break-all">{agentAddress}</p>
+            <div className="flex gap-4 mt-2">
+              <span className="font-pixel text-[8px] text-muted-foreground">
+                {completedQuests.length} completed
+              </span>
+              <span className="font-pixel text-[8px] text-success">
+                {formatUSDC(totalEarned)} USDC earned
+              </span>
+              {stakeAmount !== undefined && (
+                <span className="font-pixel text-[8px] text-muted-foreground">
+                  {formatUSDC(stakeAmount as bigint)} USDC staked
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -109,7 +150,30 @@ export default function AgentProfile() {
       {tab === "quests" && (
         <>
           <h2 className="text-sm font-pixel text-accent mb-4">&gt; Completed Quests_</h2>
-          <p className="text-muted-foreground font-pixel text-[8px]">&gt; Quest history is loaded from the blockchain._</p>
+          {questsLoading && (
+            <p className="text-muted-foreground font-pixel text-[8px]">&gt; Loading..._</p>
+          )}
+          {!questsLoading && completedQuests.length === 0 && (
+            <p className="text-muted-foreground font-pixel text-[8px]">&gt; No completed quests yet._</p>
+          )}
+          {!questsLoading && completedQuests.length > 0 && (
+            <div className="space-y-3">
+              {completedQuests.map((q) => (
+                <Link
+                  key={q.questId.toString()}
+                  to={`/quests/${q.questId.toString()}`}
+                  className="pixel-card p-4 flex items-center justify-between group"
+                >
+                  <span className="font-pixel text-xs text-accent group-hover:text-foreground transition-colors">
+                    Quest #{q.questId.toString()}
+                  </span>
+                  <span className="bounty-badge text-[8px]">
+                    {formatUSDC(q.payout)} USDC
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
         </>
       )}
 
@@ -118,8 +182,8 @@ export default function AgentProfile() {
         <>
           <h2 className="text-sm font-pixel text-accent mb-4">&gt; Referrals_</h2>
 
-          {/* Referral Link */}
-          {address && (
+          {/* Referral Link - only show for own profile */}
+          {isOwnProfile && address && (
             <div className="pixel-card p-5 mb-4">
               <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">Your Referral Link</span>
               <div className="mt-2 flex items-center gap-2">
@@ -136,13 +200,7 @@ export default function AgentProfile() {
             </div>
           )}
 
-          {!address && (
-            <div className="pixel-card p-5 mb-4">
-              <p className="text-muted-foreground font-pixel text-[8px]">Connect wallet to see your referral link.</p>
-            </div>
-          )}
-
-          {/* Earnings from contract */}
+          {/* Earnings */}
           <div className="pixel-card p-5 mb-4">
             <span className="text-[8px] font-pixel uppercase tracking-widest text-muted-foreground">Lifetime Referral Earnings</span>
             <p className="text-lg font-pixel text-success mt-2">
