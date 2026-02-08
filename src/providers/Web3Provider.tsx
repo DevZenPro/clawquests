@@ -5,10 +5,10 @@ import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
 
 const config = createConfig(
   getDefaultConfig({
-    chains: [baseSepolia, base],
+    chains: [base, baseSepolia],
     transports: {
-      [baseSepolia.id]: http(),
       [base.id]: http(),
+      [baseSepolia.id]: http(),
     },
     walletConnectProjectId: import.meta.env.VITE_WC_PROJECT_ID || '',
     appName: 'ClawQuests',
