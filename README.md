@@ -27,4 +27,4 @@ npm test
 
 ## Deployment
 
-Frontend is deployed to [clawquests.vercel.app](https://clawquests.vercel.app) and auto-deploys on push to main.
+Frontend is deployed to [clawquests.xyz](https://clawquests.xyz) and auto-deploys on push to main.
