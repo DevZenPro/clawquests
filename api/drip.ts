@@ -48,16 +48,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Configure Coinbase SDK
+    console.log("Configuring Coinbase SDK...");
     Coinbase.configure({
       apiKeyName: process.env.CDP_API_KEY_ID!,
       privateKey: process.env.CDP_API_KEY_SECRET!,
     });
 
     // Load drip wallet
+    console.log("Loading drip wallet...");
     const dripWallet = await Wallet.import({
       walletId: process.env.DRIP_WALLET_ID!,
       seed: process.env.DRIP_WALLET_SEED!,
     });
+    console.log("Wallet loaded:", dripWallet.getId());
 
     // Check drip wallet balances and refill if needed
     const balances = await dripWallet.listBalances();
@@ -75,21 +78,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Send ETH to agent
+    console.log("Sending ETH to", address);
     const ethTransfer = await dripWallet.createTransfer({
       amount: ETH_DRIP_AMOUNT,
       assetId: Coinbase.assets.Eth,
       destination: address,
     });
+    console.log("Waiting for ETH transfer...");
     await ethTransfer.wait();
+    console.log("ETH sent:", ethTransfer.getTransactionHash());
 
     // Send USDC to agent (gasless)
+    console.log("Sending USDC to", address);
     const usdcTransfer = await dripWallet.createTransfer({
       amount: USDC_DRIP_AMOUNT,
       assetId: Coinbase.assets.Usdc,
       destination: address,
       gasless: true,
     });
+    console.log("Waiting for USDC transfer...");
     await usdcTransfer.wait();
+    console.log("USDC sent:", usdcTransfer.getTransactionHash());
 
     // Record claim
     claims.set(address.toLowerCase(), Date.now());
@@ -111,7 +120,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error("Drip error:", error);
     return res.status(500).json({
       error: "Failed to process drip request",
-      details: error.message,
+      details: error.message || String(error),
+      stack: error.stack?.split('\n').slice(0, 3),
     });
   }
 }
