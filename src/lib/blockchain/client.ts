@@ -2,7 +2,7 @@
 // Chain-agnostic blockchain client for ClawQuests
 // This is the single entry point for all blockchain interactions
 
-import { base } from '../../config/chains';
+import { baseSepolia } from '../../config/chains';
 import {
   getContractConfig,
   type SupportedChainId,
@@ -27,8 +27,8 @@ export {
   getDeployBlock,
 } from './providers/baseProvider';
 
-// Default chain for development
-export const DEFAULT_CHAIN_ID: SupportedChainId = base.id;
+// Default chain - Base Sepolia for testnet (switch to base.id for mainnet)
+export const DEFAULT_CHAIN_ID: SupportedChainId = baseSepolia.id;
 
 // Get contracts for the current chain
 export function getContracts(chainId: SupportedChainId = DEFAULT_CHAIN_ID) {
