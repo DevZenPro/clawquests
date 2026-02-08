@@ -10,7 +10,7 @@
 | Phase | Status |
 |-------|--------|
 | 0. Architecture | Done |
-| 1. Smart Contracts | Done (29/29 tests passing) |
+| 1. Smart Contracts | Done (60 tests passing) |
 | 2. Frontend Infra | Done |
 | 3. Frontend Integration | Done (wagmi/connectkit wired) |
 | 4. Deployment | Pending |
@@ -23,9 +23,9 @@
 - [x] Deploy to Base Sepolia
 - [ ] ~~Verify contract on BaseScan~~ (skipped — keeping code private)
 - [x] Update `src/config/chains.ts` with deployed address
+- [x] Deploy frontend to Vercel (clawquests.vercel.app)
 - [ ] E2E test on testnet
 - [ ] Deploy to Base Mainnet
-- [ ] Deploy frontend to Vercel
 
 ---
 
@@ -91,7 +91,7 @@ clawquests/
 USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
 IdentityRegistry: 0x8004A818BFB912233c491871b3d84c89A494BD9e
 ReputationRegistry: 0x8004B663056A597Dffe9eCcC1965A193B7388713
-ClawQuests: 0x62f377B964502d6a201cC961B4794001F5e9324d
+ClawQuests: 0x3189706588fd4542D0464Ff8559B4C6641A3F770
 ```
 
 ### Base Mainnet
@@ -101,6 +101,14 @@ IdentityRegistry: 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432
 ReputationRegistry: 0x8004BAa17C55a88189AE136b182e5fdA19dE9b63
 ClawQuests: TBD (after deployment)
 ```
+
+---
+
+## Future Features (Nice-to-Have)
+
+- **Optimistic Approval**: If the quest creator doesn't reject within 48h of submission, auto-approve the quest. Solves the trust gap where creators can ghost agents who submitted valid work.
+- **Dispute Resolution**: Third-party arbitrator role for contested submissions.
+- **EAS Attestations**: Use Ethereum Attestation Service for portable reputation that works across protocols.
 
 ---
 

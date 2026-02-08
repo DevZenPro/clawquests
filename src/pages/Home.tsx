@@ -1,18 +1,16 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useReadContract, useWatchContractEvent } from "wagmi";
+import { useReadContract } from "wagmi";
 import StatCard from "@/components/StatCard";
 import ActivityFeed from "@/components/ActivityFeed";
 import AgentPulseTicker from "@/components/AgentPulseTicker";
 import { getContracts, formatUSDC } from "@/lib/blockchain/client";
+import { useQuestEvents } from "@/hooks/useQuestEvents";
 import pixelMascot from "@/assets/pixel-lobster-mascot.png";
 
 const contracts = getContracts();
 
 export default function Home() {
-  const [completedEvents, setCompletedEvents] = useState<
-    { questId: bigint; claimer: string; payout: bigint }[]
-  >([]);
+  const { events, isLoading: eventsLoading } = useQuestEvents();
 
   const { data: totalVolume } = useReadContract({
     address: contracts.clawQuests.address,
@@ -38,29 +36,12 @@ export default function Home() {
     functionName: 'getOpenQuests',
   });
 
-  useWatchContractEvent({
-    address: contracts.clawQuests.address,
-    abi: contracts.clawQuests.abi,
-    eventName: 'QuestCompleted',
-    onLogs(logs) {
-      for (const log of logs) {
-        const args = log.args as { questId?: bigint; claimer?: string; payout?: bigint };
-        if (args.questId !== undefined && args.claimer && args.payout !== undefined) {
-          setCompletedEvents((prev) => [
-            { questId: args.questId!, claimer: args.claimer!, payout: args.payout! },
-            ...prev.slice(0, 9),
-          ]);
-        }
-      }
-    },
-  });
-
   const openQuestCount = openQuestIds ? openQuestIds.length : 0;
 
   return (
     <div className="min-h-screen">
       {/* Agent Pulse Ticker */}
-      <AgentPulseTicker />
+      <AgentPulseTicker events={events} />
 
       {/* Hero */}
       <section className="relative py-20 md:py-28 overflow-hidden">
@@ -115,26 +96,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Recent Completed Events from chain */}
-      {completedEvents.length > 0 && (
-        <section className="container mx-auto px-4 py-8">
-          <h2 className="text-sm font-pixel text-accent mb-4">&gt; Live Completions_</h2>
-          <div className="pixel-card p-4 space-y-2">
-            {completedEvents.map((evt, i) => (
-              <div key={i} className="flex items-center justify-between text-sm border-b border-primary/10 pb-2 last:border-b-0">
-                <span className="font-pixel text-[8px] text-success">Quest #{evt.questId.toString()} completed</span>
-                <span className="bounty-badge text-[8px]">{formatUSDC(evt.payout)} USDC</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Activity */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-sm font-pixel text-accent mb-6">&gt; Recent Activity_</h2>
         <div className="pixel-card p-0 max-w-3xl overflow-hidden">
-          <ActivityFeed />
+          <ActivityFeed events={events} isLoading={eventsLoading} />
         </div>
       </section>
     </div>

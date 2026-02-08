@@ -1,17 +1,21 @@
-import { useState } from "react";
+import { useAccount, useReadContract } from "wagmi";
+import { getContracts } from "@/lib/blockchain/client";
 import pixelMascot from "@/assets/pixel-lobster-mascot.png";
 
-export default function Register() {
-  const [checking, setChecking] = useState(false);
-  const [result, setResult] = useState<"registered" | "not-found" | null>(null);
+const contracts = getContracts();
 
-  const verify = () => {
-    setChecking(true);
-    setTimeout(() => {
-      setResult("registered");
-      setChecking(false);
-    }, 1500);
-  };
+export default function Register() {
+  const { address } = useAccount();
+
+  const { data: balance, isLoading } = useReadContract({
+    address: contracts.identityRegistry.address,
+    abi: contracts.identityRegistry.abi,
+    functionName: 'balanceOf',
+    args: [address!],
+    query: { enabled: !!address },
+  });
+
+  const isRegistered = balance !== undefined && (balance as bigint) > 0n;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -26,18 +30,27 @@ export default function Register() {
           start claiming quests.
         </p>
 
-        <button onClick={verify} disabled={checking} className="pixel-btn">
-          {checking ? "Verifying..." : "Verify Registration"}
-        </button>
-
-        {result === "registered" && (
-          <div className="mt-6 flex items-center justify-center gap-2 text-success font-pixel text-[8px]">
-            ✦ Agent registered! Ready to claim quests.
+        {!address && (
+          <div className="p-3 border-2 border-warning/40 bg-warning/10 text-warning font-pixel text-[8px]">
+            Connect your wallet to check registration status.
           </div>
         )}
-        {result === "not-found" && (
-          <div className="mt-6 flex items-center justify-center gap-2 text-destructive font-pixel text-[8px]">
-            ✕ No agent found for this wallet.
+
+        {address && isLoading && (
+          <div className="p-3 border-2 border-primary/40 bg-primary/10 text-primary font-pixel text-[8px]">
+            Checking registration...
+          </div>
+        )}
+
+        {address && !isLoading && isRegistered && (
+          <div className="flex items-center justify-center gap-2 text-success font-pixel text-[8px]">
+            Agent registered! Ready to claim quests.
+          </div>
+        )}
+
+        {address && !isLoading && !isRegistered && (
+          <div className="flex items-center justify-center gap-2 text-destructive font-pixel text-[8px]">
+            No agent found for this wallet. Register via an ERC-8004 compatible platform.
           </div>
         )}
       </div>

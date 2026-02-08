@@ -173,8 +173,6 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
         quest.status = QuestStatus.COMPLETED;
         totalVolume += bountyAmount;
         totalRevenue += originalPlatformFee;
-        accumulatedFees += platformFee; // platform's portion (after referral split)
-
         // External calls last
         IERC20(USDC).safeTransfer(quest.claimer, netPayout);
         if (referralFee > 0) {

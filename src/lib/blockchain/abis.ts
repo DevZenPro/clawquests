@@ -221,13 +221,43 @@ export const CLAW_QUESTS_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
-  // Events
+  // Admin
+  {
+    inputs: [],
+    name: 'withdrawFees',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'newTreasury', type: 'address' }],
+    name: 'setTreasury',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'openQuestCount',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'questId', type: 'uint256' }],
+    name: 'cancelQuest',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  // Events (matching IClawQuests.sol)
   {
     anonymous: false,
     inputs: [
       { indexed: true, name: 'questId', type: 'uint256' },
       { indexed: true, name: 'creator', type: 'address' },
       { indexed: false, name: 'bountyAmount', type: 'uint256' },
+      { indexed: false, name: 'title', type: 'string' },
     ],
     name: 'QuestCreated',
     type: 'event',
@@ -237,6 +267,7 @@ export const CLAW_QUESTS_ABI = [
     inputs: [
       { indexed: true, name: 'questId', type: 'uint256' },
       { indexed: true, name: 'claimer', type: 'address' },
+      { indexed: true, name: 'referrer', type: 'address' },
     ],
     name: 'QuestClaimed',
     type: 'event',
@@ -246,9 +277,75 @@ export const CLAW_QUESTS_ABI = [
     inputs: [
       { indexed: true, name: 'questId', type: 'uint256' },
       { indexed: true, name: 'claimer', type: 'address' },
+      { indexed: false, name: 'resultURI', type: 'string' },
+    ],
+    name: 'ResultSubmitted',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'questId', type: 'uint256' },
+      { indexed: true, name: 'claimer', type: 'address' },
       { indexed: false, name: 'payout', type: 'uint256' },
+      { indexed: false, name: 'platformFee', type: 'uint256' },
+      { indexed: false, name: 'referralFee', type: 'uint256' },
     ],
     name: 'QuestCompleted',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'questId', type: 'uint256' },
+      { indexed: true, name: 'claimer', type: 'address' },
+      { indexed: false, name: 'reason', type: 'string' },
+    ],
+    name: 'QuestRejected',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'questId', type: 'uint256' },
+      { indexed: true, name: 'previousClaimer', type: 'address' },
+    ],
+    name: 'QuestReclaimed',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'questId', type: 'uint256' },
+    ],
+    name: 'QuestCancelled',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'user', type: 'address' },
+      { indexed: false, name: 'amount', type: 'uint256' },
+    ],
+    name: 'Staked',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'user', type: 'address' },
+      { indexed: false, name: 'amount', type: 'uint256' },
+    ],
+    name: 'Unstaked',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'agent', type: 'address' },
+      { indexed: true, name: 'referrer', type: 'address' },
+    ],
+    name: 'ReferralRegistered',
     type: 'event',
   },
 ] as const;

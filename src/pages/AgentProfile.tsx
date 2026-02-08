@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAccount, useReadContract } from "wagmi";
-import { MOCK_AGENTS } from "@/lib/mock-data";
 import { getContracts, formatUSDC, generateReferralLink } from "@/lib/blockchain/client";
 
 const contracts = getContracts();
@@ -9,9 +8,28 @@ const contracts = getContracts();
 export default function AgentProfile() {
   const { id } = useParams();
   const { address } = useAccount();
-  const agent = MOCK_AGENTS.find((a) => a.id === Number(id));
   const [tab, setTab] = useState<"quests" | "referrals">("quests");
   const [copied, setCopied] = useState(false);
+
+  const agentId = id ? BigInt(id) : undefined;
+
+  // Fetch agent owner from IdentityRegistry
+  const { data: owner, isLoading: ownerLoading } = useReadContract({
+    address: contracts.identityRegistry.address,
+    abi: contracts.identityRegistry.abi,
+    functionName: 'ownerOf',
+    args: [agentId!],
+    query: { enabled: agentId !== undefined },
+  });
+
+  // Fetch agent tokenURI
+  const { data: tokenURI } = useReadContract({
+    address: contracts.identityRegistry.address,
+    abi: contracts.identityRegistry.abi,
+    functionName: 'tokenURI',
+    args: [agentId!],
+    query: { enabled: agentId !== undefined },
+  });
 
   // Fetch referral earnings from contract
   const { data: referralEarnings } = useReadContract({
@@ -22,7 +40,15 @@ export default function AgentProfile() {
     query: { enabled: !!address },
   });
 
-  if (!agent) {
+  if (ownerLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <p className="font-pixel text-xs text-muted-foreground">&gt; Loading agent..._</p>
+      </div>
+    );
+  }
+
+  if (!owner) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <p className="font-pixel text-xs text-muted-foreground">&gt; Agent not found._</p>
@@ -30,6 +56,8 @@ export default function AgentProfile() {
     );
   }
 
+  const ownerAddr = owner as string;
+  const truncatedOwner = `${ownerAddr.slice(0, 6)}...${ownerAddr.slice(-4)}`;
   const referralLink = address ? generateReferralLink(address) : '';
 
   const handleCopy = () => {
@@ -46,22 +74,16 @@ export default function AgentProfile() {
       <div className="pixel-card p-6 md:p-8 mb-8">
         <div className="flex items-center gap-6">
           <div className="h-20 w-20 border-2 border-accent bg-accent/10 flex items-center justify-center text-2xl font-pixel text-accent shrink-0">
-            {agent.name.charAt(0)}
+            #{id}
           </div>
           <div>
-            <h1 className="text-base font-pixel text-accent">{agent.name}</h1>
-            <p className="font-pixel text-[8px] text-muted-foreground mt-1">{agent.wallet}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-8">
-          <div className="p-4 bg-secondary border-2 border-warning/30 text-center">
-            <p className="text-lg font-pixel text-warning mt-2">{agent.reputation}</p>
-            <span className="text-[8px] font-pixel text-muted-foreground uppercase tracking-wider">Reputation</span>
-          </div>
-          <div className="p-4 bg-secondary border-2 border-success/30 text-center">
-            <p className="text-lg font-pixel text-success mt-2">{agent.questsCompleted}</p>
-            <span className="text-[8px] font-pixel text-muted-foreground uppercase tracking-wider">Completed</span>
+            <h1 className="text-base font-pixel text-accent">Agent #{id}</h1>
+            <p className="font-pixel text-[8px] text-muted-foreground mt-1">{truncatedOwner}</p>
+            {tokenURI && (
+              <p className="font-pixel text-[7px] text-primary mt-1 truncate max-w-[300px]">
+                {(tokenURI as string).slice(0, 60)}...
+              </p>
+            )}
           </div>
         </div>
       </div>

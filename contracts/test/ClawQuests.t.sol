@@ -1053,9 +1053,9 @@ contract ClawQuestsTest is Test {
         vm.prank(creator);
         quests.approveCompletion(questId);
 
-        // Platform fee = 5 USDC, no referral so full fee goes to accumulated
-        uint256 platformFee = (HUNDRED_USDC * 500) / 10000;
-        assertEq(quests.accumulatedFees(), creationFee + platformFee, "platform fee not tracked");
+        // Platform fee is sent directly to treasury in approveCompletion,
+        // so accumulatedFees should only contain the creation fee
+        assertEq(quests.accumulatedFees(), creationFee, "only creation fee should be accumulated");
 
         // Withdraw and verify zeroed
         quests.withdrawFees();
@@ -1126,6 +1126,43 @@ contract ClawQuestsTest is Test {
 
         assertEq(usdc.balanceOf(agent1) - agentBalBefore, expectedNetPayout, "fuzz: agent payout wrong");
         assertEq(usdc.balanceOf(treasury) - treasuryBalBefore, expectedPlatformFee, "fuzz: treasury fee wrong");
+    }
+
+    // ============ Solvency Tests ============
+
+    function test_UnstakeAfterFeeWithdrawal() public {
+        // 1. Creator stakes
+        vm.prank(creator);
+        quests.stake(TEN_USDC);
+
+        // 2. Creator creates a quest with 100 USDC bounty
+        vm.startPrank(creator);
+        string[] memory tags = new string[](1);
+        tags[0] = "solvency";
+        uint256 questId = quests.createQuest("Solvency Test", "Verify no double-spend", HUNDRED_USDC, tags, block.timestamp + 7 days);
+        vm.stopPrank();
+
+        // 3. Agent claims, submits, and creator approves
+        vm.prank(agent1);
+        quests.claimQuest(questId);
+        vm.prank(agent1);
+        quests.submitResult(questId, "ipfs://solvency-result");
+        vm.prank(creator);
+        quests.approveCompletion(questId);
+
+        // 4. Owner withdraws accumulated fees (creation fee only — platform fee already sent to treasury)
+        uint256 fees = quests.accumulatedFees();
+        if (fees > 0) {
+            quests.withdrawFees();
+        }
+
+        // 5. Creator unstakes their full original stake — contract must be solvent
+        uint256 creatorBalBefore = usdc.balanceOf(creator);
+        vm.prank(creator);
+        quests.unstake(TEN_USDC);
+
+        assertEq(usdc.balanceOf(creator), creatorBalBefore + TEN_USDC, "creator should receive full stake back");
+        assertEq(quests.stakes(creator), 0, "creator stake should be zero");
     }
 
     // ============ Helper Functions ============

@@ -90,7 +90,8 @@ export function formatUSDC(amount: bigint): string {
   const divisor = BigInt(10 ** decimals);
   const whole = amount / divisor;
   const fraction = amount % divisor;
-  return `${whole}.${fraction.toString().padStart(decimals, '0')}`;
+  const fractionStr = fraction.toString().padStart(decimals, '0').replace(/0+$/, '');
+  return fractionStr ? `${whole}.${fractionStr}` : `${whole.toString()}`;
 }
 
 // Helper to parse USDC amounts to bigint
