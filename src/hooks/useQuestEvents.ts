@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePublicClient } from 'wagmi';
-import { getContracts, formatUSDC } from '@/lib/blockchain/client';
+import { getContracts, formatUSDC, getDeployBlock, DEFAULT_CHAIN_ID } from '@/lib/blockchain/client';
 
 export interface QuestEvent {
   type: 'created' | 'claimed' | 'completed';
@@ -22,9 +22,7 @@ export function useQuestEvents() {
 
     async function fetchEvents() {
       try {
-        const currentBlock = await client!.getBlockNumber();
-        // ~1 day of blocks on Base (2s block time)
-        const fromBlock = currentBlock > 50000n ? currentBlock - 50000n : 0n;
+        const fromBlock = getDeployBlock(DEFAULT_CHAIN_ID);
 
         const [created, claimed, completed] = await Promise.all([
           client!.getContractEvents({

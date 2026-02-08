@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { usePublicClient } from "wagmi";
-import { getContracts } from "@/lib/blockchain/client";
+import { getContracts, getDeployBlock, DEFAULT_CHAIN_ID } from "@/lib/blockchain/client";
 
 interface RegisteredAgent {
   agentId: bigint;
@@ -25,7 +25,7 @@ export default function Agents() {
           address: contracts.identityRegistry.address,
           abi: contracts.identityRegistry.abi,
           eventName: 'Registered',
-          fromBlock: 0n,
+          fromBlock: getDeployBlock(DEFAULT_CHAIN_ID),
         });
 
         const registeredAgents: RegisteredAgent[] = logs.map((log) => {

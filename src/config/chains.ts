@@ -5,6 +5,7 @@ export interface ChainConfig {
   name: string;
   rpcUrl: string;
   explorerUrl: string;
+  deployBlock: bigint;
   contracts: {
     clawQuests: `0x${string}`;
     identityRegistry: `0x${string}`;
@@ -18,6 +19,7 @@ export const base: ChainConfig = {
   name: 'Base',
   rpcUrl: 'https://mainnet.base.org',
   explorerUrl: 'https://basescan.org',
+  deployBlock: 41_400_000n,
   contracts: {
     clawQuests: '0x78f6421A4D3FE3A2967d5c2601A13fF9482044aE',
     identityRegistry: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
@@ -31,6 +33,7 @@ export const baseSepolia: ChainConfig = {
   name: 'Base Sepolia',
   rpcUrl: 'https://sepolia.base.org',
   explorerUrl: 'https://sepolia.basescan.org',
+  deployBlock: 37_000_000n,
   contracts: {
     clawQuests: '0x4438d7FB07592D489De26582408577ABfbAfFEa7',
     identityRegistry: '0x8004A818BFB912233c491871b3d84c89A494BD9e',

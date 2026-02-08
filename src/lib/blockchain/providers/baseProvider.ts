@@ -18,6 +18,11 @@ export function getChainConfig(chainId: SupportedChainId) {
   throw new Error(`Unsupported chain ID: ${chainId}`);
 }
 
+// Get the deployment block for event queries
+export function getDeployBlock(chainId: SupportedChainId): bigint {
+  return getChainConfig(chainId).deployBlock;
+}
+
 // Contract configurations for wagmi hooks
 export function getContractConfig(chainId: SupportedChainId) {
   const config = getChainConfig(chainId);

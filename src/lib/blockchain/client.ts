@@ -24,6 +24,7 @@ export {
   parseUSDC,
   MIN_STAKE_AMOUNT,
   CLAIM_TIMEOUT_SECONDS,
+  getDeployBlock,
 } from './providers/baseProvider';
 
 // Default chain for development
