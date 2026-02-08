@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
+import { ethers } from "ethers";
+import { HDKey } from "@scure/bip32";
 
 // Rate limiting: track claims in memory (resets on cold start)
 // For production, use Redis or a database
@@ -77,25 +79,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await dripWallet.faucet("usdc");
     }
 
-    // Send ETH to agent (don't wait - Vercel has 10s timeout)
+    // --- ETH Transfer (using SDK as it works) ---
     console.log("Sending ETH to", address);
     const ethTransfer = await dripWallet.createTransfer({
       amount: ETH_DRIP_AMOUNT,
       assetId: Coinbase.assets.Eth,
       destination: address,
     });
-    const ethTxHash = ethTransfer.getTransactionHash();
-    console.log("ETH transfer submitted:", ethTxHash);
+    const ethTxHash = ethTransfer.getTransactionHash() ?? "pending_sdk";
+    console.log("ETH transfer submitted via SDK:", ethTxHash);
 
-    // Send USDC to agent
-    console.log("Sending USDC to", address);
-    const usdcTransfer = await dripWallet.createTransfer({
-      amount: USDC_DRIP_AMOUNT,
-      assetId: Coinbase.assets.Usdc,
-      destination: address,
-    });
-    const usdcTxHash = usdcTransfer.getTransactionHash();
-    console.log("USDC transfer submitted:", usdcTxHash);
+
+    // --- USDC Transfer (using ethers.js for reliability) ---
+    console.log("Deriving private key for ethers.js...");
+    const seed = process.env.DRIP_WALLET_SEED!;
+    const seedBuffer = Buffer.from(seed, 'hex');
+    const master = HDKey.fromMasterSeed(seedBuffer);
+    const derived = master.derive("m/44'/60'/0'/0/0");
+    const privateKey = Buffer.from(derived.privateKey!).toString('hex');
+
+    const provider = new ethers.JsonRpcProvider(process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org');
+    const signer = new ethers.Wallet('0x' + privateKey, provider);
+
+    const usdcContractAddress = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+    const usdcAbi = [
+      "function transfer(address to, uint256 amount) returns (bool)",
+    ];
+    const usdcContract = new ethers.Contract(usdcContractAddress, usdcAbi, signer);
+
+    console.log(`Sending ${USDC_DRIP_AMOUNT} USDC to ${address} via ethers.js...`);
+    const usdcAmountWei = ethers.parseUnits(USDC_DRIP_AMOUNT.toString(), 6);
+    const usdcTx = await usdcContract.transfer(address, usdcAmountWei);
+    
+    const usdcTxHash = usdcTx.hash;
+    console.log("USDC transfer submitted via ethers.js:", usdcTxHash);
+    
+    // Do not wait for confirmation to avoid timeout
+    // await usdcTx.wait();
 
     // Record claim
     claims.set(address.toLowerCase(), Date.now());
@@ -105,11 +125,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       address,
       eth: {
         amount: ETH_DRIP_AMOUNT,
-        txHash: ethTxHash ?? "pending",
+        txHash: ethTxHash,
       },
       usdc: {
         amount: USDC_DRIP_AMOUNT,
-        txHash: usdcTxHash ?? "pending",
+        txHash: usdcTxHash,
       },
       message: `Sent ${ETH_DRIP_AMOUNT} ETH and ${USDC_DRIP_AMOUNT} USDC to ${address}`,
     });
