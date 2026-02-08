@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePublicClient } from 'wagmi';
-import { getContracts, formatUSDC, getDeployBlock, DEFAULT_CHAIN_ID } from '@/lib/blockchain/client';
+import { getContracts, formatUSDC, getDeployBlock, DEFAULT_CHAIN_ID, fetchEventsChunked } from '@/lib/blockchain/client';
 
 export interface QuestEvent {
   type: 'created' | 'claimed' | 'completed';
@@ -24,25 +24,15 @@ export function useQuestEvents() {
       try {
         const fromBlock = getDeployBlock(DEFAULT_CHAIN_ID);
 
+        const eventParams = {
+          address: contracts.clawQuests.address,
+          abi: contracts.clawQuests.abi,
+          fromBlock,
+        };
         const [created, claimed, completed] = await Promise.all([
-          client!.getContractEvents({
-            address: contracts.clawQuests.address,
-            abi: contracts.clawQuests.abi,
-            eventName: 'QuestCreated',
-            fromBlock,
-          }),
-          client!.getContractEvents({
-            address: contracts.clawQuests.address,
-            abi: contracts.clawQuests.abi,
-            eventName: 'QuestClaimed',
-            fromBlock,
-          }),
-          client!.getContractEvents({
-            address: contracts.clawQuests.address,
-            abi: contracts.clawQuests.abi,
-            eventName: 'QuestCompleted',
-            fromBlock,
-          }),
+          fetchEventsChunked(client!, { ...eventParams, eventName: 'QuestCreated' }),
+          fetchEventsChunked(client!, { ...eventParams, eventName: 'QuestClaimed' }),
+          fetchEventsChunked(client!, { ...eventParams, eventName: 'QuestCompleted' }),
         ]);
 
         const allEvents: QuestEvent[] = [

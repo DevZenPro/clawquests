@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAccount, useReadContract, usePublicClient } from "wagmi";
-import { getContracts, formatUSDC, generateReferralLink, getDeployBlock, DEFAULT_CHAIN_ID } from "@/lib/blockchain/client";
+import { getContracts, formatUSDC, generateReferralLink, getDeployBlock, DEFAULT_CHAIN_ID, fetchEventsChunked } from "@/lib/blockchain/client";
 
 const contracts = getContracts();
 
@@ -46,7 +46,7 @@ export default function AgentProfile() {
 
     async function fetchQuests() {
       try {
-        const logs = await client!.getContractEvents({
+        const logs = await fetchEventsChunked(client!, {
           address: contracts.clawQuests.address,
           abi: contracts.clawQuests.abi,
           eventName: 'QuestCompleted',

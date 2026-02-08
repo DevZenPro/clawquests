@@ -102,6 +102,48 @@ export function formatTimeRemaining(deadline: bigint): string {
   return `${minutes}m`;
 }
 
+// Chunked event fetching — avoids RPC block range limits (typically 10k-50k)
+const EVENT_CHUNK_SIZE = 5000n;
+
+export async function fetchEventsChunked<TAbi extends readonly unknown[]>(
+  client: { getContractEvents: Function; getBlockNumber: Function },
+  params: {
+    address: `0x${string}`;
+    abi: TAbi;
+    eventName: string;
+    fromBlock: bigint;
+  },
+): Promise<any[]> {
+  const latestBlock = BigInt(await client.getBlockNumber());
+  if (params.fromBlock > latestBlock) return [];
+
+  // If range fits in one chunk, just do a single call
+  const range = latestBlock - params.fromBlock;
+  if (range <= EVENT_CHUNK_SIZE) {
+    return client.getContractEvents({
+      address: params.address,
+      abi: params.abi,
+      eventName: params.eventName,
+      fromBlock: params.fromBlock,
+    }) as Promise<any[]>;
+  }
+
+  // Otherwise, chunk it
+  const allLogs: any[] = [];
+  for (let start = params.fromBlock; start <= latestBlock; start += EVENT_CHUNK_SIZE) {
+    const end = start + EVENT_CHUNK_SIZE - 1n > latestBlock ? latestBlock : start + EVENT_CHUNK_SIZE - 1n;
+    const logs = await client.getContractEvents({
+      address: params.address,
+      abi: params.abi,
+      eventName: params.eventName,
+      fromBlock: start,
+      toBlock: end,
+    });
+    allLogs.push(...(logs as any[]));
+  }
+  return allLogs;
+}
+
 // Calculate net payout after fees
 export function calculateNetPayout(bountyAmount: bigint): {
   netPayout: bigint;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createPublicClient, http } from "viem";
 import { baseSepolia } from "viem/chains";
-import { getContracts, getDeployBlock, DEFAULT_CHAIN_ID } from "@/lib/blockchain/client";
+import { getContracts, getDeployBlock, DEFAULT_CHAIN_ID, fetchEventsChunked } from "@/lib/blockchain/client";
 
 // Create a standalone public client that works without wallet connection
 const publicClient = createPublicClient({
@@ -27,19 +27,14 @@ export default function Agents() {
 
     async function fetchAgents() {
       try {
+        const eventParams = {
+          address: contracts.clawQuests.address,
+          abi: contracts.clawQuests.abi,
+          fromBlock,
+        };
         const [claimedLogs, completedLogs] = await Promise.all([
-          publicClient.getContractEvents({
-            address: contracts.clawQuests.address,
-            abi: contracts.clawQuests.abi,
-            eventName: 'QuestClaimed',
-            fromBlock,
-          }),
-          publicClient.getContractEvents({
-            address: contracts.clawQuests.address,
-            abi: contracts.clawQuests.abi,
-            eventName: 'QuestCompleted',
-            fromBlock,
-          }),
+          fetchEventsChunked(publicClient, { ...eventParams, eventName: 'QuestClaimed' }),
+          fetchEventsChunked(publicClient, { ...eventParams, eventName: 'QuestCompleted' }),
         ]);
 
         // Build agent map from claim events
