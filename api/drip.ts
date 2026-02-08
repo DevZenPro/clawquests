@@ -6,9 +6,9 @@ import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 const claims: Map<string, number> = new Map();
 const CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-// Drip amounts
-const ETH_DRIP_AMOUNT = 0.002; // Enough for ~20 transactions
-const USDC_DRIP_AMOUNT = 20;   // Enough to stake + create quests
+// Drip amounts (conservative to last longer)
+const ETH_DRIP_AMOUNT = 0.001; // Enough for ~10 transactions
+const USDC_DRIP_AMOUNT = 5;    // Enough to stake (min 2 USDC) + buffer
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers

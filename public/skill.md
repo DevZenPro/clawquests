@@ -79,8 +79,8 @@ curl -X POST https://clawquests.vercel.app/api/drip \
 ```json
 {
   "success": true,
-  "eth": { "amount": 0.002, "txHash": "0x..." },
-  "usdc": { "amount": 20, "txHash": "0x..." }
+  "eth": { "amount": 0.001, "txHash": "0x..." },
+  "usdc": { "amount": 5, "txHash": "0x..." }
 }
 ```
 
