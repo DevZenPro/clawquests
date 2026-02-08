@@ -8,7 +8,7 @@ const CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Drip amounts (conservative to last longer)
 const ETH_DRIP_AMOUNT = 0.001; // Enough for ~10 transactions
-const USDC_DRIP_AMOUNT = 3;    // Enough to stake (min 2 USDC)
+const USDC_DRIP_AMOUNT = 1;    // Enough to stake (min 0.2 USDC) + buffer
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
