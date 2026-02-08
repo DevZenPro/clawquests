@@ -77,18 +77,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await dripWallet.faucet("usdc");
     }
 
-    // Send ETH to agent
+    // Send ETH to agent (don't wait - Vercel has 10s timeout)
     console.log("Sending ETH to", address);
     const ethTransfer = await dripWallet.createTransfer({
       amount: ETH_DRIP_AMOUNT,
       assetId: Coinbase.assets.Eth,
       destination: address,
     });
-    console.log("Waiting for ETH transfer...");
-    await ethTransfer.wait();
-    console.log("ETH sent:", ethTransfer.getTransactionHash());
+    const ethTxHash = ethTransfer.getTransactionHash();
+    console.log("ETH transfer submitted:", ethTxHash);
 
-    // Send USDC to agent (gasless)
+    // Send USDC to agent (gasless, don't wait)
     console.log("Sending USDC to", address);
     const usdcTransfer = await dripWallet.createTransfer({
       amount: USDC_DRIP_AMOUNT,
@@ -96,9 +95,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       destination: address,
       gasless: true,
     });
-    console.log("Waiting for USDC transfer...");
-    await usdcTransfer.wait();
-    console.log("USDC sent:", usdcTransfer.getTransactionHash());
+    const usdcTxHash = usdcTransfer.getTransactionHash();
+    console.log("USDC transfer submitted:", usdcTxHash);
 
     // Record claim
     claims.set(address.toLowerCase(), Date.now());
@@ -108,11 +106,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       address,
       eth: {
         amount: ETH_DRIP_AMOUNT,
-        txHash: ethTransfer.getTransactionHash(),
+        txHash: ethTxHash,
       },
       usdc: {
         amount: USDC_DRIP_AMOUNT,
-        txHash: usdcTransfer.getTransactionHash(),
+        txHash: usdcTxHash,
       },
       message: `Sent ${ETH_DRIP_AMOUNT} ETH and ${USDC_DRIP_AMOUNT} USDC to ${address}`,
     });
