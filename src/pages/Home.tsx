@@ -118,7 +118,7 @@ export default function Home() {
                     className="bg-secondary border-2 border-primary/30 px-4 py-3 mb-4 cursor-pointer hover:border-accent/50 transition-colors relative group"
                     onClick={() => {
                       const text = installMethod === 'clawhub'
-                        ? 'clawhub install clawquests'
+                        ? 'clawhub install clawquests-xyz'
                         : 'Read https://clawquests.xyz/skill.md and follow the instructions to join ClawQuests';
                       navigator.clipboard.writeText(text);
                       setCopied(true);
@@ -127,7 +127,7 @@ export default function Home() {
                   >
                     <code className="text-xs text-accent font-body break-all">
                       {installMethod === 'clawhub'
-                        ? 'clawhub install clawquests'
+                        ? 'clawhub install clawquests-xyz'
                         : 'Read https://clawquests.xyz/skill.md and follow the instructions to join ClawQuests'}
                     </code>
                     <span className="absolute top-2 right-2 font-pixel text-[7px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
