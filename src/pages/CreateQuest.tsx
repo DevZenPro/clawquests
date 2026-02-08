@@ -5,8 +5,6 @@ import {
   getContracts,
   formatUSDC,
   parseUSDC,
-  hasMinimumStake,
-  MIN_STAKE_AMOUNT,
 } from "@/lib/blockchain/client";
 import { CREATION_FEE_USDC } from "@/lib/blockchain/providers/baseProvider";
 
@@ -30,6 +28,13 @@ export default function CreateQuest() {
     query: { enabled: !!address },
   });
 
+  // Check min stake from contract
+  const { data: minStakeAmount } = useReadContract({
+    address: contracts.clawQuests.address,
+    abi: contracts.clawQuests.abi,
+    functionName: 'minStakeAmount',
+  });
+
   // Check USDC allowance
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: contracts.usdc.address,
@@ -44,7 +49,8 @@ export default function CreateQuest() {
     hash: txHash,
   });
 
-  const stakeOk = userStake !== undefined && hasMinimumStake(userStake as bigint);
+  const minStake = minStakeAmount as bigint | undefined;
+  const stakeOk = userStake !== undefined && minStake !== undefined && (userStake as bigint) >= minStake;
   const bountyNum = parseFloat(bounty) || 0;
   const bountyBigInt = bountyNum > 0 ? parseUSDC(bountyNum.toFixed(6)) : BigInt(0);
   const totalCost = bountyBigInt + CREATION_FEE_USDC;
@@ -108,7 +114,7 @@ export default function CreateQuest() {
       )}
       {address && !stakeOk && userStake !== undefined && (
         <div className="p-3 border-2 border-destructive/40 bg-destructive/10 text-destructive font-pixel text-[8px] mb-6">
-          You must stake at least {formatUSDC(MIN_STAKE_AMOUNT)} USDC to create quests.{" "}
+          You must stake at least {minStake !== undefined ? formatUSDC(minStake) : '...'} USDC to create quests.{" "}
           <Link to="/staking" className="underline hover:text-accent">Go to Staking &rarr;</Link>
         </div>
       )}

@@ -199,6 +199,14 @@ export const CLAW_QUESTS_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  // Config
+  {
+    inputs: [],
+    name: 'minStakeAmount',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
   // Platform Stats
   {
     inputs: [],

@@ -4,8 +4,6 @@ import {
   getContracts,
   formatUSDC,
   parseUSDC,
-  hasMinimumStake,
-  MIN_STAKE_AMOUNT,
 } from "@/lib/blockchain/client";
 
 const contracts = getContracts();
@@ -39,6 +37,12 @@ export default function Staking() {
     query: { enabled: !!address },
   });
 
+  const { data: minStakeAmount } = useReadContract({
+    address: contracts.clawQuests.address,
+    abi: contracts.clawQuests.abi,
+    functionName: 'minStakeAmount',
+  });
+
   const { writeContract, data: txHash, isPending, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -56,7 +60,8 @@ export default function Staking() {
   }
 
   const stakeAmount = currentStake as bigint | undefined;
-  const meetsMinimum = stakeAmount !== undefined && hasMinimumStake(stakeAmount);
+  const minStake = minStakeAmount as bigint | undefined;
+  const meetsMinimum = stakeAmount !== undefined && minStake !== undefined && stakeAmount >= minStake;
   const parsedAmount = parseFloat(amount) || 0;
   const parsedAmountBigInt = parsedAmount > 0 ? parseUSDC(parsedAmount.toFixed(6)) : BigInt(0);
   const needsApproval = !allowance || (allowance as bigint) < parsedAmountBigInt;
@@ -110,7 +115,7 @@ export default function Staking() {
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <h1 className="text-lg font-pixel text-accent mb-2">&gt; Staking_</h1>
       <p className="text-muted-foreground mb-8">
-        A minimum stake of {formatUSDC(MIN_STAKE_AMOUNT)} USDC is required to create quests.
+        A minimum stake of {minStake !== undefined ? formatUSDC(minStake) : '...'} USDC is required to create quests.
       </p>
 
       {!address && (
@@ -126,7 +131,7 @@ export default function Staking() {
           {stakeAmount !== undefined ? formatUSDC(stakeAmount) : '--'} USDC
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-[8px] font-pixel text-muted-foreground">Minimum: {formatUSDC(MIN_STAKE_AMOUNT)} USDC</span>
+          <span className="text-[8px] font-pixel text-muted-foreground">Minimum: {minStake !== undefined ? formatUSDC(minStake) : '...'} USDC</span>
           {stakeAmount !== undefined && (
             meetsMinimum ? (
               <span className="text-[8px] font-pixel text-success">Met</span>
