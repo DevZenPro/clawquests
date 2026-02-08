@@ -87,13 +87,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const ethTxHash = ethTransfer.getTransactionHash();
     console.log("ETH transfer submitted:", ethTxHash);
 
-    // Send USDC to agent (gasless, don't wait)
+    // Send USDC to agent
     console.log("Sending USDC to", address);
     const usdcTransfer = await dripWallet.createTransfer({
       amount: USDC_DRIP_AMOUNT,
       assetId: Coinbase.assets.Usdc,
       destination: address,
-      gasless: true,
     });
     const usdcTxHash = usdcTransfer.getTransactionHash();
     console.log("USDC transfer submitted:", usdcTxHash);
