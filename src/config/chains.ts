@@ -33,9 +33,9 @@ export const baseSepolia: ChainConfig = {
   name: 'Base Sepolia',
   rpcUrl: 'https://base-sepolia.gateway.tenderly.co',  // Tenderly (no block range limits)
   explorerUrl: 'https://sepolia.basescan.org',
-  deployBlock: 37_395_000n,  // Updated to actual deploy block
+  deployBlock: 37_397_759n,
   contracts: {
-    clawQuests: '0x4438d7FB07592D489De26582408577ABfbAfFEa7', // Updated 2026-02-08
+    clawQuests: '0x5d52D4247329037a5Bceb8991c12963Db763351d',
     identityRegistry: '0x8004A818BFB912233c491871b3d84c89A494BD9e',
     reputationRegistry: '0x8004B663056A597Dffe9eCcC1965A193B7388713',
     usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', // USDC on Base Sepolia

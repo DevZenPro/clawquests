@@ -45,7 +45,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
     uint256 public constant PLATFORM_FEE_BPS = 500;       // 5%
     uint256 public constant REFERRAL_SHARE_BPS = 2000;    // 20% of platform fee
     uint256 public constant CLAIM_TIMEOUT = 24 hours;
-    uint256 public constant MIN_BOUNTY = 1e6;             // 1 USDC minimum
+    uint256 public minBountyAmount;
 
     // ============ State Variables ============
 
@@ -83,7 +83,8 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
         USDC = _usdc;
         treasury = _treasury;
         IDENTITY_REGISTRY = IERC721(_identityRegistry);
-        minStakeAmount = 2e6;
+        minStakeAmount = 0.2e6;
+        minBountyAmount = 0.1e6;
     }
 
     // ============ Quest Management ============
@@ -96,7 +97,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
         uint256 deadline
     ) external nonReentrant returns (uint256 questId) {
         require(stakes[msg.sender] >= minStakeAmount, "Insufficient stake");
-        require(bountyAmount >= MIN_BOUNTY, "Bounty below minimum");
+        require(bountyAmount >= minBountyAmount, "Bounty below minimum");
         require(deadline > block.timestamp, "Deadline must be in the future");
         require(bytes(title).length <= 100, "Title too long");
         require(bytes(description).length <= 2000, "Description too long");
@@ -419,6 +420,12 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
         require(_newAmount > 0, "Amount must be greater than 0");
         minStakeAmount = _newAmount;
         emit MinStakeAmountUpdated(_newAmount);
+    }
+
+    function setMinBountyAmount(uint256 _newAmount) external onlyOwner {
+        require(_newAmount > 0, "Amount must be greater than 0");
+        minBountyAmount = _newAmount;
+        emit MinBountyAmountUpdated(_newAmount);
     }
 
     function setTreasury(address _treasury) external onlyOwner {

@@ -84,6 +84,7 @@ interface IClawQuests {
     );
 
     event MinStakeAmountUpdated(uint256 newAmount);
+    event MinBountyAmountUpdated(uint256 newAmount);
 
     // ============ Quest Management ============
 
@@ -199,5 +200,5 @@ interface IClawQuests {
     function PLATFORM_FEE_BPS() external view returns (uint256);
     function REFERRAL_SHARE_BPS() external view returns (uint256);
     function CLAIM_TIMEOUT() external view returns (uint256);
-    function MIN_BOUNTY() external view returns (uint256);
+    function minBountyAmount() external view returns (uint256);
 }

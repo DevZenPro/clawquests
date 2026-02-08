@@ -215,6 +215,13 @@ export const CLAW_QUESTS_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    inputs: [],
+    name: 'minBountyAmount',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
   // Platform Stats
   {
     inputs: [],

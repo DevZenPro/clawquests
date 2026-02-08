@@ -73,7 +73,8 @@ contract ClawQuestsTest is Test {
     function test_Deployment() public view {
         assertEq(quests.USDC(), address(usdc));
         assertEq(quests.treasury(), treasury);
-        assertEq(quests.minStakeAmount(), TWO_USDC);
+        assertEq(quests.minStakeAmount(), 0.2e6);
+        assertEq(quests.minBountyAmount(), 0.1e6);
         assertEq(quests.PLATFORM_FEE_BPS(), 500);
     }
 
@@ -111,17 +112,17 @@ contract ClawQuestsTest is Test {
     }
 
     function test_RevertWhen_UnstakeBelowMinWithActiveQuests() public {
-        // Stake 3 USDC and create a quest (which requires minStakeAmount = 2 USDC)
+        // Stake 0.3 USDC and create a quest (which requires minStakeAmount = 0.2 USDC)
         vm.startPrank(creator);
-        quests.stake(3 * ONE_USDC);
+        quests.stake(0.3e6);
 
         string[] memory tags = new string[](1);
         tags[0] = "test";
         quests.createQuest("Test", "Desc", HUNDRED_USDC, tags, block.timestamp + 7 days);
 
-        // Try to unstake so remaining < minStakeAmount (unstake 2, leaving 1 < 2)
+        // Try to unstake so remaining < minStakeAmount (unstake 0.2, leaving 0.1 < 0.2)
         vm.expectRevert();
-        quests.unstake(2 * ONE_USDC);
+        quests.unstake(0.2e6);
         vm.stopPrank();
     }
 
@@ -198,9 +199,9 @@ contract ClawQuestsTest is Test {
         string[] memory tags = new string[](1);
         tags[0] = "test";
 
-        // 0.5 USDC is below MIN_BOUNTY of 1 USDC
+        // 0.05 USDC is below minBountyAmount of 0.1 USDC
         vm.expectRevert();
-        quests.createQuest("Test", "Desc", 0.5e6, tags, block.timestamp + 7 days);
+        quests.createQuest("Test", "Desc", 0.05e6, tags, block.timestamp + 7 days);
         vm.stopPrank();
     }
 
@@ -773,6 +774,18 @@ contract ClawQuestsTest is Test {
         vm.prank(agent1);
         vm.expectRevert();
         quests.setMinStakeAmount(5e6);
+    }
+
+    function test_ownerCanSetMinBountyAmount() public {
+        uint256 newAmount = 5e6; // 5 USDC
+        quests.setMinBountyAmount(newAmount);
+        assertEq(quests.minBountyAmount(), newAmount, "Bounty amount should be updated");
+    }
+
+    function test_RevertWhen_NonOwnerSetsMinBountyAmount() public {
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.setMinBountyAmount(5e6);
     }
 
     // ============ Access Control Tests ============
