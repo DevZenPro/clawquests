@@ -90,11 +90,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const provider = new ethers.JsonRpcProvider(process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org');
     const signer = new ethers.Wallet('0x' + privateKey, provider);
 
+    // Get the nonce manually to prevent race conditions
+    const nonce = await signer.getNonce('pending');
+    console.log(`Using starting nonce: ${nonce}`);
+
     // 1. Send ETH
-    console.log(`Sending ${ETH_DRIP_AMOUNT} ETH to ${address} via ethers.js...`);
+    console.log(`Sending ${ETH_DRIP_AMOUNT} ETH to ${address} with nonce ${nonce}...`);
     const ethTx = await signer.sendTransaction({
       to: address,
       value: ethers.parseEther(ETH_DRIP_AMOUNT.toString()),
+      nonce: nonce,
     });
     const ethTxHash = ethTx.hash;
     console.log("ETH transfer submitted via ethers.js:", ethTxHash);
@@ -104,9 +109,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const usdcAbi = ["function transfer(address to, uint256 amount) returns (bool)"];
     const usdcContract = new ethers.Contract(usdcContractAddress, usdcAbi, signer);
     
-    console.log(`Sending ${USDC_DRIP_AMOUNT} USDC to ${address} via ethers.js...`);
+    console.log(`Sending ${USDC_DRIP_AMOUNT} USDC to ${address} with nonce ${nonce + 1}...`);
     const usdcAmountWei = ethers.parseUnits(USDC_DRIP_AMOUNT.toString(), 6);
-    const usdcTx = await usdcContract.transfer(address, usdcAmountWei);
+    const usdcTx = await usdcContract.transfer(address, usdcAmountWei, { nonce: nonce + 1 });
     const usdcTxHash = usdcTx.hash;
     console.log("USDC transfer submitted via ethers.js:", usdcTxHash);
 
