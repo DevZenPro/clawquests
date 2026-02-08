@@ -35,6 +35,7 @@ contract ClawQuestsTest is Test {
     
     uint256 constant USDC_DECIMALS = 6;
     uint256 constant ONE_USDC = 1e6;
+    uint256 constant TWO_USDC = 2e6;
     uint256 constant TEN_USDC = 10e6;
     uint256 constant HUNDRED_USDC = 100e6;
 
@@ -72,7 +73,7 @@ contract ClawQuestsTest is Test {
     function test_Deployment() public view {
         assertEq(quests.USDC(), address(usdc));
         assertEq(quests.treasury(), treasury);
-        assertEq(quests.MIN_STAKE_AMOUNT(), TEN_USDC);
+        assertEq(quests.minStakeAmount(), TWO_USDC);
         assertEq(quests.PLATFORM_FEE_BPS(), 500);
     }
 
@@ -110,17 +111,17 @@ contract ClawQuestsTest is Test {
     }
 
     function test_RevertWhen_UnstakeBelowMinWithActiveQuests() public {
-        // Stake 20 USDC and create a quest (which requires MIN_STAKE)
+        // Stake 3 USDC and create a quest (which requires minStakeAmount = 2 USDC)
         vm.startPrank(creator);
-        quests.stake(20 * ONE_USDC);
+        quests.stake(3 * ONE_USDC);
 
         string[] memory tags = new string[](1);
         tags[0] = "test";
         quests.createQuest("Test", "Desc", HUNDRED_USDC, tags, block.timestamp + 7 days);
 
-        // Try to unstake so remaining < MIN_STAKE (unstake 15, leaving 5)
+        // Try to unstake so remaining < minStakeAmount (unstake 2, leaving 1 < 2)
         vm.expectRevert();
-        quests.unstake(15 * ONE_USDC);
+        quests.unstake(2 * ONE_USDC);
         vm.stopPrank();
     }
 
@@ -760,6 +761,18 @@ contract ClawQuestsTest is Test {
     function test_RevertWhen_WithdrawFeesWithNoFees() public {
         vm.expectRevert();
         quests.withdrawFees();
+    }
+
+    function test_ownerCanSetMinStakeAmount() public {
+        uint256 newAmount = 5e6; // 5 USDC
+        quests.setMinStakeAmount(newAmount);
+        assertEq(quests.minStakeAmount(), newAmount, "Stake amount should be updated");
+    }
+
+    function test_RevertWhen_NonOwnerSetsMinStakeAmount() public {
+        vm.prank(agent1);
+        vm.expectRevert();
+        quests.setMinStakeAmount(5e6);
     }
 
     // ============ Access Control Tests ============

@@ -83,6 +83,8 @@ interface IClawQuests {
         address indexed referrer
     );
 
+    event MinStakeAmountUpdated(uint256 newAmount);
+
     // ============ Quest Management ============
 
     /**
@@ -192,7 +194,7 @@ interface IClawQuests {
     // ============ Constants ============
 
     function USDC() external view returns (address);
-    function MIN_STAKE_AMOUNT() external view returns (uint256);
+    function minStakeAmount() external view returns (uint256);
     function CREATION_FEE() external view returns (uint256);
     function PLATFORM_FEE_BPS() external view returns (uint256);
     function REFERRAL_SHARE_BPS() external view returns (uint256);

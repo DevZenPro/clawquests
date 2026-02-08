@@ -40,7 +40,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
 
     address public immutable USDC;
     IERC721 public immutable IDENTITY_REGISTRY;
-    uint256 public constant MIN_STAKE_AMOUNT = 10e6;      // 10 USDC
+    uint256 public minStakeAmount;
     uint256 public constant CREATION_FEE = 0.1e6;         // 0.10 USDC
     uint256 public constant PLATFORM_FEE_BPS = 500;       // 5%
     uint256 public constant REFERRAL_SHARE_BPS = 2000;    // 20% of platform fee
@@ -83,6 +83,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
         USDC = _usdc;
         treasury = _treasury;
         IDENTITY_REGISTRY = IERC721(_identityRegistry);
+        minStakeAmount = 2e6;
     }
 
     // ============ Quest Management ============
@@ -94,7 +95,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
         string[] calldata skillTags,
         uint256 deadline
     ) external nonReentrant returns (uint256 questId) {
-        require(stakes[msg.sender] >= MIN_STAKE_AMOUNT, "Insufficient stake");
+        require(stakes[msg.sender] >= minStakeAmount, "Insufficient stake");
         require(bountyAmount >= MIN_BOUNTY, "Bounty below minimum");
         require(deadline > block.timestamp, "Deadline must be in the future");
         require(bytes(title).length <= 100, "Title too long");
@@ -250,7 +251,7 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
 
         // Check if user has active quests (OPEN or CLAIMED)
         if (_hasActiveQuests(msg.sender)) {
-            require(remaining >= MIN_STAKE_AMOUNT, "Must maintain minimum stake with active quests");
+            require(remaining >= minStakeAmount, "Must maintain minimum stake with active quests");
         }
 
         stakes[msg.sender] = remaining;
@@ -413,6 +414,12 @@ contract ClawQuests is IClawQuests, ERC721, Ownable, ReentrancyGuard {
     }
 
     // ============ Admin Functions ============
+
+    function setMinStakeAmount(uint256 _newAmount) external onlyOwner {
+        require(_newAmount > 0, "Amount must be greater than 0");
+        minStakeAmount = _newAmount;
+        emit MinStakeAmountUpdated(_newAmount);
+    }
 
     function setTreasury(address _treasury) external onlyOwner {
         require(_treasury != address(0), "Invalid treasury");

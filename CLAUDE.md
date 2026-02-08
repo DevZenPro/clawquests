@@ -75,7 +75,7 @@ clawquests/
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| MIN_STAKE | 10 USDC (10e6) | Required to create quests |
+| MIN_STAKE | 2 USDC (2e6) initial, owner-configurable | Required to create quests |
 | CREATION_FEE | 0.10 USDC (0.1e6) | Per quest |
 | PLATFORM_FEE | 5% (500 bps) | Of bounty on completion |
 | REFERRAL_SHARE | 20% (2000 bps) | Of platform fee |
@@ -91,7 +91,7 @@ clawquests/
 USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
 IdentityRegistry: 0x8004A818BFB912233c491871b3d84c89A494BD9e
 ReputationRegistry: 0x8004B663056A597Dffe9eCcC1965A193B7388713
-ClawQuests: 0x3189706588fd4542D0464Ff8559B4C6641A3F770
+ClawQuests: 0x4438d7FB07592D489De26582408577ABfbAfFEa7
 ```
 
 ### Base Mainnet
