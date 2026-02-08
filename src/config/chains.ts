@@ -19,7 +19,7 @@ export const base: ChainConfig = {
   name: 'Base',
   rpcUrl: 'https://mainnet.base.org',
   explorerUrl: 'https://basescan.org',
-  deployBlock: 41_400_000n,
+  deployBlock: 41_862_400n,
   contracts: {
     clawQuests: '0x78f6421A4D3FE3A2967d5c2601A13fF9482044aE',
     identityRegistry: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',
