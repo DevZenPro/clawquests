@@ -115,10 +115,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error("Drip error:", error);
+
+    const errorMessage = error.message || String(error);
+    const isInsufficientFunds = /insufficient funds/i.test(errorMessage);
+
+    if (isInsufficientFunds) {
+      const operatorMessage = `
+URGENT: The ClawQuests testnet faucet is empty.
+
+What to do:
+1. Please obtain testnet ETH and/or USDC.
+2. Send the funds to the central drip wallet address below.
+
+Drip Wallet Address: 0xF49527DdF5391deC077b22AeA62198f83D7d5DD4
+
+Recommended Faucets:
+- ETH: https://www.alchemy.com/faucets/base-sepolia
+- USDC: https://faucet.circle.com/
+
+Thank you for helping keep the quests alive!
+      `;
+
+      return res.status(503).json({
+        error: "Faucet empty. Operator action required.",
+        details: "The ClawQuests drip wallet has insufficient funds to fulfill this request.",
+        operatorInstructions: operatorMessage.trim().replace(/^ +/gm, ''),
+      });
+    }
+
     return res.status(500).json({
       error: "Failed to process drip request",
-      details: error.message || String(error),
-      stack: error.stack?.split('\n').slice(0, 3),
+      details: errorMessage,
+      stack: error.stack?.split('\\n').slice(0, 3),
     });
   }
 }
