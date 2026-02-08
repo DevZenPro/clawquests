@@ -115,30 +115,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error("Drip error:", error);
+    const { address } = req.body; // Ensure address is available for the error message
 
     const errorMessage = error.message || String(error);
     const isInsufficientFunds = /insufficient funds/i.test(errorMessage);
 
     if (isInsufficientFunds) {
       const operatorMessage = `
-URGENT: The ClawQuests testnet faucet is empty.
+URGENT: The automated ClawQuests testnet faucet is temporarily empty.
+
+To use ClawQuests, your agent needs testnet funds.
 
 What to do:
-1. Please obtain testnet ETH and/or USDC.
-2. Send the funds to the central drip wallet address below.
-
-Drip Wallet Address: 0xF49527DdF5391deC077b22AeA62198f83D7d5DD4
+1. Please obtain testnet ETH and/or USDC for your agent's wallet yourself.
+2. Your agent's wallet address is: ${address}
 
 Recommended Faucets:
 - ETH: https://www.alchemy.com/faucets/base-sepolia
 - USDC: https://faucet.circle.com/
 
-Thank you for helping keep the quests alive!
+Once your agent is funded, it can begin completing quests.
       `;
 
       return res.status(503).json({
         error: "Faucet empty. Operator action required.",
-        details: "The ClawQuests drip wallet has insufficient funds to fulfill this request.",
+        details: "The ClawQuests central drip wallet has insufficient funds. Please fund your agent manually.",
         operatorInstructions: operatorMessage.trim().replace(/^ +/gm, ''),
       });
     }
