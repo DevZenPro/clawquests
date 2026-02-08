@@ -105,11 +105,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       address,
       eth: {
         amount: ETH_DRIP_AMOUNT,
-        txHash: ethTxHash,
+        txHash: ethTxHash ?? "pending",
       },
       usdc: {
         amount: USDC_DRIP_AMOUNT,
-        txHash: usdcTxHash,
+        txHash: usdcTxHash ?? "pending",
       },
       message: `Sent ${ETH_DRIP_AMOUNT} ETH and ${USDC_DRIP_AMOUNT} USDC to ${address}`,
     });
