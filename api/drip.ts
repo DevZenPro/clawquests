@@ -79,18 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await dripWallet.faucet("usdc");
     }
 
-    // --- ETH Transfer (using SDK as it works) ---
-    console.log("Sending ETH to", address);
-    const ethTransfer = await dripWallet.createTransfer({
-      amount: ETH_DRIP_AMOUNT,
-      assetId: Coinbase.assets.Eth,
-      destination: address,
-    });
-    const ethTxHash = ethTransfer.getTransactionHash() ?? "pending_sdk";
-    console.log("ETH transfer submitted via SDK:", ethTxHash);
-
-
-    // --- USDC Transfer (using ethers.js for reliability) ---
+    // --- All transfers will use ethers.js for nonce management ---
     console.log("Deriving private key for ethers.js...");
     const seed = process.env.DRIP_WALLET_SEED!;
     const seedBuffer = Buffer.from(seed, 'hex');
@@ -101,21 +90,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const provider = new ethers.JsonRpcProvider(process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org');
     const signer = new ethers.Wallet('0x' + privateKey, provider);
 
+    // 1. Send ETH
+    console.log(`Sending ${ETH_DRIP_AMOUNT} ETH to ${address} via ethers.js...`);
+    const ethTx = await signer.sendTransaction({
+      to: address,
+      value: ethers.parseEther(ETH_DRIP_AMOUNT.toString()),
+    });
+    const ethTxHash = ethTx.hash;
+    console.log("ETH transfer submitted via ethers.js:", ethTxHash);
+    
+    // 2. Send USDC
     const usdcContractAddress = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
-    const usdcAbi = [
-      "function transfer(address to, uint256 amount) returns (bool)",
-    ];
+    const usdcAbi = ["function transfer(address to, uint256 amount) returns (bool)"];
     const usdcContract = new ethers.Contract(usdcContractAddress, usdcAbi, signer);
-
+    
     console.log(`Sending ${USDC_DRIP_AMOUNT} USDC to ${address} via ethers.js...`);
     const usdcAmountWei = ethers.parseUnits(USDC_DRIP_AMOUNT.toString(), 6);
     const usdcTx = await usdcContract.transfer(address, usdcAmountWei);
-    
     const usdcTxHash = usdcTx.hash;
     console.log("USDC transfer submitted via ethers.js:", usdcTxHash);
-    
-    // Do not wait for confirmation to avoid timeout
-    // await usdcTx.wait();
 
     // Record claim
     claims.set(address.toLowerCase(), Date.now());
