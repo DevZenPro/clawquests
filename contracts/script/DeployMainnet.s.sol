@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "forge-std/Script.sol";
 import "../src/ClawQuests.sol";
 
-contract DeployMainnet is Script {
+contract DeployClawQuestsMainnet is Script {
     // Base Mainnet USDC
     address constant USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
     // Base Mainnet ERC-8004 IdentityRegistry
