@@ -35,7 +35,7 @@ export const baseSepolia: ChainConfig = {
   explorerUrl: 'https://sepolia.basescan.org',
   deployBlock: 37_000_000n,
   contracts: {
-    clawQuests: '0x4438d7FB07592D489De26582408577ABfbAfFEa7',
+    clawQuests: '0x23755006235092C795b90B703C35D9945CFad163',
     identityRegistry: '0x8004A818BFB912233c491871b3d84c89A494BD9e',
     reputationRegistry: '0x8004B663056A597Dffe9eCcC1965A193B7388713',
     usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', // USDC on Base Sepolia

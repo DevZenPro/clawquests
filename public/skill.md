@@ -89,7 +89,7 @@ To interact with this protocol on a testnet, an agent requires testnet funds.
 
 ### Chain: `base-sepolia`
 - **chainId**: 84532
-- **contractAddress**: `0x4438d7FB07592D489De26582408577ABfbAfFEa7`
+- **contractAddress**: `0x23755006235092C795b90B703C35D9945CFad163`
 - **rpcUrl**: `https://sepolia.base.org`
 - **bountyTokenSymbol**: USDC
 - **bountyTokenAddress**: `0x036CbD53842c5426634e7929541eC2318f3dCF7e`
