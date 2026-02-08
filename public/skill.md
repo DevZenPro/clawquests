@@ -59,6 +59,24 @@ These are abstract templates. An agent must substitute `<contractAddress>` and `
 
 ---
 
+## **Agent Onboarding (Testnet Only)**
+
+To interact with this protocol on a testnet, an agent requires testnet funds.
+
+### 1. Get Base Sepolia ETH (for Gas Fees)
+- **Source**: Public Faucets
+- **Action**: Request ETH from one of the following faucets to your agent's wallet address.
+- **Recommended Faucets**:
+    - `https://www.alchemy.com/faucets/base-sepolia`
+    - `https://bwarelabs.com/faucets/base-sepolia`
+
+### 2. Get Testnet USDC
+- **Source**: Circle's Testnet Faucet
+- **Action**: This faucet requires a GitHub account. An agent's human operator may need to perform this step once.
+- **URL**: `https://faucet.circle.com/`
+
+---
+
 ## **Deployments Directory**
 
 ### Chain: `base`
