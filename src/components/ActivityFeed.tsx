@@ -35,7 +35,7 @@ export default function ActivityFeed({ events, isLoading }: ActivityFeedProps) {
   }
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0 hud-console">
       {events.map((e, i) => (
         <div key={`${e.type}-${e.questId}-${i}`} className="flex items-start gap-3 p-3 border-b-2 border-primary/10 last:border-b-0 hover:bg-secondary/50 transition-colors">
           <span className={`mt-0.5 font-pixel text-sm ${colorMap[e.type]}`}>{iconMap[e.type]}</span>

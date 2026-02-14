@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════ */
+/* HUD — ClawQuests monitoring interface (teal theme)     */
+/* Adapted from Moltlaunch CRT/HUD with teal palette      */
+/* ═══════════════════════════════════════════════════════ */
+
+/* Beveled panel with inset glow */
+.hud-panel {
+  border: 1px solid #122a24;
+  border-top: 1px solid #1a3d34;
+  background: linear-gradient(180deg, #071510 0%, #051210 4%, #040a08 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(0,212,170,0.06),
+    0 0 12px rgba(0,0,0,0.5),
+    0 0 4px rgba(0,212,170,0.04);
+}
+
+/* Corner bracket decorations */
+.hud-corner {
+  position: relative;
+}
+.hud-corner::before,
+.hud-corner::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+.hud-corner::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid #00d4aa;
+  border-left: 2px solid #00d4aa;
+  opacity: 0.35;
+}
+.hud-corner::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid #00d4aa;
+  border-right: 2px solid #00d4aa;
+  opacity: 0.35;
+}
+
+/* Neon text glow */
+.neon-text {
+  text-shadow:
+    0 0 6px rgba(0,212,170,0.5),
+    0 0 18px rgba(0,212,170,0.2);
+}
+
+.neon-text-strong {
+  text-shadow:
+    0 0 8px rgba(0,212,170,0.6),
+    0 0 20px rgba(0,212,170,0.3),
+    0 0 40px rgba(0,212,170,0.1);
+}
+
+/* Neon border glow */
+.neon-border {
+  border-color: #122a24;
+  box-shadow: 0 0 8px rgba(0,212,170,0.08);
+}
+.neon-border:hover {
+  border-color: #1a4a3a;
+  box-shadow: 0 0 12px rgba(0,212,170,0.15);
+}
+
+/* Segmented health bar */
+.hud-health-bar {
+  position: relative;
+  height: 16px;
+  background: #061210;
+  border: 1px solid #0e2420;
+  overflow: hidden;
+}
+.hud-health-bar .hud-health-fill {
+  height: 100%;
+  transition: width 0.5s ease-out;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 4px,
+    rgba(0,0,0,0.35) 4px,
+    rgba(0,0,0,0.35) 5px
+  );
+}
+
+/* Game power bar — segmented HP style */
+.game-power-bar {
+  position: relative;
+  height: 12px;
+  background: #061210;
+  border: 1px solid #0e2420;
+  overflow: hidden;
+}
+.game-power-bar .fill {
+  height: 100%;
+  transition: width 0.5s ease-out;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 6px,
+    rgba(0,0,0,0.4) 6px,
+    rgba(0,0,0,0.4) 7px
+  );
+}
+
+/* Section divider with diamond bullet */
+.hud-section-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(0,212,170,0.55);
+}
+.hud-section-tab::before {
+  content: '◆';
+  font-size: 8px;
+  opacity: 0.7;
+}
+.hud-section-tab::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, #122a24, transparent);
+}
+
+/* Command button */
+.hud-cmd-btn {
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: 1px solid #122a24;
+  background: linear-gradient(180deg, #071510 0%, #040a08 100%);
+  color: #5a8a7a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hud-cmd-btn:hover {
+  border-color: #1a4a3a;
+  color: #00d4aa;
+  background: linear-gradient(180deg, #0a1e18 0%, #061210 100%);
+  box-shadow: 0 0 8px rgba(0,212,170,0.08);
+  text-shadow: 0 0 6px rgba(0,212,170,0.3);
+}
+
+/* Status bar (header) */
+.hud-status-bar {
+  border-bottom: 1px solid #122a24;
+  background: linear-gradient(180deg, #071510 0%, #051210 100%);
+  box-shadow:
+    inset 0 -1px 0 rgba(0,0,0,0.3),
+    0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Console / event log */
+.hud-console {
+  border-top: 1px solid #122a24;
+  background: linear-gradient(180deg, #051210 0%, #040a08 100%);
+  box-shadow: inset 0 1px 0 rgba(0,212,170,0.03);
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* Rank badges                                             */
+/* ═══════════════════════════════════════════════════════ */
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid;
+}
+
+.rank-badge-1 {
+  color: #ffd700;
+  border-color: rgba(255,215,0,0.4);
+  text-shadow: 0 0 8px rgba(255,215,0,0.6);
+  box-shadow: 0 0 12px rgba(255,215,0,0.2);
+  animation: rank-glow 2s ease-in-out infinite;
+}
+
+.rank-badge-2 {
+  color: #c0c0c0;
+  border-color: rgba(192,192,192,0.3);
+  text-shadow: 0 0 6px rgba(192,192,192,0.5);
+  box-shadow: 0 0 8px rgba(192,192,192,0.15);
+  animation: rank-glow 2s ease-in-out infinite 0.3s;
+}
+
+.rank-badge-3 {
+  color: #cd7f32;
+  border-color: rgba(205,127,50,0.3);
+  text-shadow: 0 0 6px rgba(205,127,50,0.5);
+  box-shadow: 0 0 8px rgba(205,127,50,0.15);
+  animation: rank-glow 2s ease-in-out infinite 0.6s;
+}
+
+@keyframes rank-glow {
+  0%, 100% { opacity: 0.8; filter: brightness(1); }
+  50% { opacity: 1; filter: brightness(1.3); }
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* Action badges (claim/complete)                          */
+/* ═══════════════════════════════════════════════════════ */
+
+.action-badge-claim {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(0,255,136,0.3);
+  color: #00ff88;
+  text-shadow: 0 0 4px rgba(0,255,136,0.4);
+}
+
+.action-badge-complete {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(0,212,170,0.3);
+  color: #00d4aa;
+  text-shadow: 0 0 4px rgba(0,212,170,0.4);
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* Animations                                              */
+/* ═══════════════════════════════════════════════════════ */
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+@keyframes corner-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* Scrollbar styling                                       */
+/* ═══════════════════════════════════════════════════════ */
+
+.hud-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.hud-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.hud-scroll::-webkit-scrollbar-thumb {
+  background: #122a24;
+  border-radius: 3px;
+}
+.hud-scroll::-webkit-scrollbar-thumb:hover {
+  background: #1a4a3a;
+}
+
+/* Game stat value */
+.game-stat-value {
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(255,255,255,0.08);
+}

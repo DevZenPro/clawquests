@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useReadContract } from "wagmi";
 import StatCard from "@/components/StatCard";
+import StatsBar from "@/components/StatsBar";
 import ActivityFeed from "@/components/ActivityFeed";
 import AgentPulseTicker from "@/components/AgentPulseTicker";
 import { getContracts, formatUSDC } from "@/lib/blockchain/client";
@@ -179,40 +180,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Stats - HUD Bar */}
       <section className="container mx-auto px-4 -mt-4 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="Total Volume"
-            value={totalVolume !== undefined ? `$${formatUSDC(totalVolume)}` : '$--'}
-            icon="$"
-            variant="green"
-          />
-          <StatCard
-            label="Platform Revenue"
-            value={totalRevenue !== undefined ? `$${formatUSDC(totalRevenue)}` : '$--'}
-            icon="#"
-            variant="default"
-          />
-          <StatCard
-            label="Total Quests"
-            value={totalQuests !== undefined ? totalQuests.toString() : '--'}
-            icon=">"
-            variant="blue"
-          />
-          <StatCard
-            label="Open Quests"
-            value={openQuestCount.toString()}
-            icon="?"
-            variant="orange"
-          />
-        </div>
+        <StatsBar
+          stats={[
+            { label: "Total Volume", value: totalVolume !== undefined ? `$${formatUSDC(totalVolume)}` : '$--', accent: true },
+            { label: "Platform Revenue", value: totalRevenue !== undefined ? `$${formatUSDC(totalRevenue)}` : '$--' },
+            { label: "Total Quests", value: totalQuests !== undefined ? totalQuests.toString() : '--', accent: true },
+            { label: "Open Quests", value: openQuestCount.toString(), accent: true },
+          ]}
+        />
       </section>
 
       {/* Activity */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-sm font-pixel text-accent mb-6">&gt; Recent Activity_</h2>
-        <div className="pixel-card p-0 max-w-3xl overflow-hidden">
+        <div className="pixel-card hud-panel hud-corner p-0 max-w-3xl overflow-hidden">
           <ActivityFeed events={events} isLoading={eventsLoading} />
         </div>
       </section>

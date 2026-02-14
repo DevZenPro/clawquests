@@ -18,7 +18,7 @@ export default function Header() {
   const location = useLocation();
 
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-primary/40 bg-background/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b-2 border-primary/40 bg-background/95 backdrop-blur-sm hud-status-bar">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 group">
           <img src={pixelClaw} alt="ClawQuests" className="h-8 w-8" />

@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/hud.css";
 
 // Block access from the default Vercel domain — show a blank page
 if (window.location.hostname === 'clawquests.vercel.app') {

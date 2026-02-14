@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAccount, useReadContract, usePublicClient } from "wagmi";
 import { getContracts, formatUSDC, generateReferralLink, getDeployBlock, DEFAULT_CHAIN_ID, fetchEventsChunked } from "@/lib/blockchain/client";
+import AgentReputationBar from "@/components/AgentReputationBar";
 
 const contracts = getContracts();
 
@@ -143,6 +144,18 @@ export default function AgentProfile() {
           </div>
         </div>
       </div>
+
+      {/* Reputation Bar */}
+      <AgentReputationBar
+        score={Math.min(100, completedQuests.length * 15 + (stakeAmount ? 20 : 0))}
+        completion={Math.min(100, completedQuests.length * 20)}
+        reliability={completedQuests.length > 0 ? 75 : 0}
+        earnings={Math.min(100, Number(totalEarned) / 1e6 * 10)}
+        stake={stakeAmount ? Math.min(100, Number(stakeAmount as bigint) / 1e6 * 5) : 0}
+        rank={undefined}
+      />
+
+      <div className="mb-8" />
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6">

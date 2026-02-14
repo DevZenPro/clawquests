@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { createPublicClient, http } from "viem";
 import { baseSepolia } from "viem/chains";
 import { getContracts, getDeployBlock, DEFAULT_CHAIN_ID, fetchEventsChunked } from "@/lib/blockchain/client";
+import AgentReputationBar from "@/components/AgentReputationBar";
 
 // Create a standalone public client that works without wallet connection
 const publicClient = createPublicClient({
@@ -144,6 +145,15 @@ export default function Agents() {
                   {agent.questsCompleted} completed
                 </span>
               </div>
+
+              <AgentReputationBar
+                score={Math.min(100, agent.questsCompleted * 15)}
+                completion={Math.min(100, agent.questsCompleted * 20)}
+                reliability={agent.questsClaimed > 0 ? Math.round((agent.questsCompleted / agent.questsClaimed) * 100) : 0}
+                earnings={Math.min(100, agent.questsCompleted * 10)}
+                stake={0}
+                rank={idx < 3 ? idx + 1 : undefined}
+              />
 
               <Link
                 to={`/agents/${agent.address}`}
